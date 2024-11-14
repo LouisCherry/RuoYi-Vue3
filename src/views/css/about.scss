@@ -1,0 +1,224 @@
+
+.container{
+    background-size: 100%;
+    height: 100%;
+    width: 100%;
+    background-image: url(~@/assets/img/img_bg.png);
+    background-size: contain; /* 设置背景图片保持原始尺寸 */
+    background-position: top;
+    background-repeat: no-repeat;
+    background-color:  #d6eaeb;
+    padding-bottom: 40px;
+}
+.em-content{
+    .em_top{
+       overflow: auto;
+        .em_top_left{
+            float: left;
+            width:150px;
+            .em_user{
+                width: 100%;
+                margin-top: 20px;
+                .em_name{
+                    font-size: 8vw;
+                    line-height: 10.667vw;
+                    margin: 0;
+                    padding: 0;
+                    color: #124c5c;
+                    text-align: right
+                }
+                .em_p1{
+                    width: 100%;
+                    font-size: 4.267vw;
+                    box-sizing: border-box;
+                    margin-top: 10px;
+                    padding-right: 10px;
+                    height: 5.333vw;
+                    color: #f65e86;
+                    text-align: right;
+                    white-space: nowrap
+                }
+                .em_p2{
+                    margin-top: 20px;
+                    width: 100%;
+                    box-sizing: border-box;
+                    font-size: 4.267vw;
+                   
+                    padding-right: 10px;
+                    height: 5.333vw;
+                    color: #f65e86;
+                    text-align: right;
+                    white-space: nowrap
+                }
+            }
+           .em_head{
+                width: 100px;
+                height: 100px;
+                border-radius: 50%;
+                border: 1.333vw solid #aedeeb;
+                box-shadow: 0 0 1.333vw #888888;
+                float: right;
+                margin-top: 15px;
+                img{
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 50%;
+                }
+           } 
+        }
+        .em_top_right{
+            width: 53%;
+            margin-top: 70px;
+            float: right;
+            .em_list{
+                display: flex;
+                flex-wrap: wrap;
+                .em_item{
+                    width: 45%;
+                    display: flex;
+                    margin-bottom: 10px;
+                    font-size: 14px;
+                    color: #5dafc5;
+                    div{
+                        width: 18px;
+                        height: 18px;
+                        border-radius: 50%;
+                        background: #5dafc5;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin-right: 8px;
+                        img{
+                            width: 12px;
+                            height: 12px;
+                        }
+                    }
+                }
+                .em_item_more{
+                    width: 100%;
+                }
+            }
+        }
+    }
+    .em_bottom{
+        margin-top: 15px;
+        .em_name_list{
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: space-between;
+            padding: 0 15px;
+            .em_name_item{
+                background-color: #ff83a9;
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                color: white;
+                font-size: 12px;
+                padding: 8px 10px 0px 10px;
+                box-sizing: border-box;
+                text-align: center;
+            }
+        }
+    }
+    .em_clain{
+        width: 100%;
+        height:10px;
+        background: #e6f2f3;
+        margin-top: 20px;
+    }
+}
+.em_show_my{
+    margin: 30px 15px 0 15px;
+    background-color: #b1e1ef;
+    position: relative;
+    min-height: 50px;
+    padding:  2px 15px 10px 15px;
+    border-radius: 5px;
+    box-sizing: border-box;
+    .em_my_title{
+        position: absolute;
+        top: -13px;
+        width: 180px;
+        height: 35px;
+        left: calc(50% - 90px);
+        text-align: center;
+        color: white;
+        background-image: url(~@/assets/img/img_button.png);
+        background-size: 100% 100%;
+        line-height: 35px;
+    }
+    .em_my_content{
+        background-color: white;
+        min-height: 50px;
+        padding: 40px 10px 30px 10px;
+        box-sizing: border-box;
+        border-radius: 3px;
+        font-size: 14px;
+    }
+    .em_my_card{
+        background-color: white;
+        min-height: 50px;
+        padding: 40px 20px 0px 20px;
+        box-sizing: border-box;
+        border-radius: 3px;
+        font-size: 14px;
+        .em_card_list{
+            display: flex;
+            flex-wrap: wrap;
+            .em_card_item{
+                width: 50%;
+                font-size: 12px;
+                margin-bottom: 10px;
+                overflow: hidden; /* 隐藏超出部分 */
+                white-space: nowrap; /* 保持文本在一行 */
+                text-overflow: ellipsis; /* 超出部分显示省略号 */
+                span{
+                    font-size: 14px;
+                }
+            }
+        }
+    }
+    .em_my_book{
+        background-color: white;
+        min-height: 50px;
+        padding: 40px 5px 0px 5px;
+        box-sizing: border-box;
+        border-radius: 3px;
+        font-size: 14px;
+        .em_book_list{
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            .em_book_item{
+                width: 30%;
+                height: 24vw;
+                margin-bottom: 10px;
+                border-radius: 10px;
+                img{
+                    width: 100%;
+                    height: 100%;
+                }
+            }
+        }
+    }
+}
+.em_call{
+    background-color:#ea527b;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    width: 200px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    border-radius: 25px;
+    margin-top: 40px;
+    img{
+        width: 20px;
+        vertical-align: middle;
+        margin-right: 5px;
+    }
+}

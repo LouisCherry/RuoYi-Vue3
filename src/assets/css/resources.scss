@@ -1,0 +1,35 @@
+/*
+ * @作者: 吴松泽
+ * @创建时间: 2021-04-12 13:35:11
+ * @修改时间: 2021-08-24 19:48:27
+ * @最后修改: 吴松泽
+ * @版本: [1.0]
+ * @版权: 国泰新点软件股份有限公司
+ * @描述: 设计规范的scss公共变量
+ */
+// 主色
+$baseBlue: #2e6be5;
+$baseRed: #e03f3f;
+// 辅助色
+$baseGreen: #36b389;
+$baseOrange: #f79042;
+$baseLightBlue: #8bacee;
+$baseWeakBlue: #d8e4ff;
+// 字体颜色
+$baseFontMain: #2e3033;
+$baseFontLess: #8a8f99;
+$baseFontTip: #b8becc;
+// 辅助线、边框
+$baseBorder: #dde0e4;
+// 背景
+$baseBgGrey: #f5f6f7;
+$baseBgWhite: #fff;
+
+// 输出样式变量,可在js中获取,组件tag使用
+:export {
+    baseBlue: $baseBlue;
+    baseRed: $baseRed;
+    baseGreen: $baseGreen;
+    baseOrange: $baseOrange;
+    baseFontMain: $baseFontMain
+}
