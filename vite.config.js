@@ -1,11 +1,11 @@
-import { defineConfig, loadEnv } from 'vite'
-import path from 'path'
-import createVitePlugins from './vite/plugins'
+import { defineConfig, loadEnv } from 'vite';
+import path from 'path';
+import createVitePlugins from './vite/plugins';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode, command }) => {
-  const env = loadEnv(mode, process.cwd())
-  const { VITE_APP_ENV } = env
+  const env = loadEnv(mode, process.cwd());
+  const { VITE_APP_ENV } = env;
   return {
     // 部署生产环境和开发环境下的URL。
     // 默认情况下，vite 会假设你的应用是被部署在一个域名的根路径上
@@ -19,7 +19,9 @@ export default defineConfig(({ mode, command }) => {
         '~': path.resolve(__dirname, './'),
         // 设置别名
         '@': path.resolve(__dirname, './src'),
-        'vue': 'vue/dist/vue.esm-bundler.js',
+        // 将vue别名指向兼容Vue 3的版本
+        'vue': '@vue/compat',
+        // 'vue': 'vue/dist/vue.esm-bundler.js',
       },
       // https://cn.vitejs.dev/config/#resolve-extensions
       extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue']
@@ -57,3 +59,4 @@ export default defineConfig(({ mode, command }) => {
     }
   }
 })
+

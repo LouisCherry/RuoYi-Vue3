@@ -1,6 +1,6 @@
 
 // 模拟数据
-const getData = () => {
+export const getPrivateresumeinfoData = () => {
   return {
     success: true,
     data: {
@@ -35,7 +35,7 @@ const getData = () => {
     errorMessage: '这是错误信息'
   }
 }
-const getNewData = () => {
+export const getPublicresumeinfoData = () => {
   return {
     success: true,
     data: {
@@ -72,7 +72,7 @@ const getNewData = () => {
 }
 
 // 拦截请求，配置 mock 数据
-module.exports = {
-  getData,
-  getNewData
-}
+// module.exports = {
+//   getPrivateresumeinfoData,
+//   getPublicresumeinfoData
+// }
