@@ -2,7 +2,8 @@
   <div class="component-upload-image">
     <el-upload
       multiple
-      :action="uploadImgUrl"
+      :action="customAction"
+      :data="uploadData"
       list-type="picture-card"
       :on-success="handleUploadSuccess"
       :before-upload="handleBeforeUpload"
@@ -48,6 +49,8 @@
 <script setup>
 import { getToken } from "@/utils/auth";
 
+
+
 const props = defineProps({
   modelValue: [String, Object, Array],
   // 图片数量限制
@@ -70,6 +73,18 @@ const props = defineProps({
     type: Boolean,
     default: true
   },
+  action: {
+    type: String,
+    default: ref(import.meta.env.VITE_APP_BASE_API + "/common/upload") // 默认上传地址
+  },
+  data: {
+    type: Object,
+    default:() => ({ // 使用函数返回默认值
+      "clientguid": "",
+      "rowguid": "",
+      "tag":""
+    })
+  },
 });
 
 const { proxy } = getCurrentInstance();
@@ -79,12 +94,17 @@ const uploadList = ref([]);
 const dialogImageUrl = ref("");
 const dialogVisible = ref(false);
 const baseUrl = import.meta.env.VITE_APP_BASE_API;
-const uploadImgUrl = ref(import.meta.env.VITE_APP_BASE_API + "/common/upload"); // 上传的图片服务器地址
+// const uploadImgUrl = ref(import.meta.env.VITE_APP_BASE_API + "/common/upload"); // 上传的图片服务器地址
 const headers = ref({ Authorization: "Bearer " + getToken() });
 const fileList = ref([]);
 const showTip = computed(
   () => props.isShowTip && (props.fileType || props.fileSize)
 );
+
+
+// 使用 props 中的 action
+const customAction = computed(() => props.action);
+const uploadData = computed(() => props.data);
 
 watch(() => props.modelValue, val => {
   if (val) {
