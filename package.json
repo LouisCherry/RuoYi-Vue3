@@ -9,7 +9,10 @@
     "dev": "vite",
     "build:prod": "vite build",
     "build:stage": "vite build --mode staging",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "serve:mobile": "vue-cli-service serve",
+    "build:mobile": "vue-cli-service build",
+    "lint:mobile": "vue-cli-service lint"
   },
   "repository": {
     "type": "git",
@@ -17,6 +20,7 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "2.3.1",
+    "@vue/compat": "^3.5.13",
     "@vueup/vue-quill": "1.2.0",
     "@vueuse/core": "10.11.0",
     "axios": "0.28.1",
@@ -28,18 +32,24 @@
     "jsencrypt": "3.3.2",
     "nprogress": "0.2.0",
     "pinia": "2.1.7",
+    "vant": "3.6.12",
     "vue": "3.4.31",
     "vue-cropper": "1.1.1",
     "vue-router": "4.4.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "5.0.5",
+    "@vue/eslint-config-standard": "^6.1.0",
+    "eslint": "^7.32.0",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.1.0",
+    "eslint-plugin-vue": "^9.0.0",
     "sass": "1.77.5",
     "unplugin-auto-import": "0.17.6",
     "unplugin-vue-setup-extend-plus": "1.0.1",
     "vite": "5.3.2",
     "vite-plugin-compression": "0.5.1",
-    "vite-plugin-svg-icons": "2.0.1",
-    "vue-image-upload-preview": "^1.0.2"
+    "vite-plugin-svg-icons": "2.0.1"
   }
 }
