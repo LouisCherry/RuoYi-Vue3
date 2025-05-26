@@ -48,6 +48,8 @@
 
 <script setup>
 import { getToken } from "@/utils/auth";
+import { delAttachinfo } from "@/api/baomu/attachinfo";
+
 
 
 
@@ -85,6 +87,11 @@ const props = defineProps({
       "tag":""
     })
   },
+  // 自定义删除图片接口
+  customDeleteApi: {
+    type: Function,
+    default: null
+  }
 });
 
 const { proxy } = getCurrentInstance();
@@ -117,6 +124,12 @@ watch(() => props.modelValue, val => {
           item = { name: baseUrl + item, url: baseUrl + item };
         } else {
           item = { name: item, url: item };
+        }
+      }else if(typeof item == "object" ){
+        if (item.url.indexOf(baseUrl) === -1) {
+          item = { name: baseUrl + item.name, url: baseUrl + item.url,id:item.id };
+        } else {
+          item = { name: item.name, url: item.url,id:item.id };
         }
       }
       return item;
@@ -168,7 +181,7 @@ function handleExceed() {
 // 上传成功回调
 function handleUploadSuccess(res, file) {
   if (res.code === 200) {
-    uploadList.value.push({ name: res.fileName, url: res.fileName });
+    uploadList.value.push({ name: res.newFileName, url: res.url,id:res.id });
     uploadedSuccessfully();
   } else {
     number.value--;
@@ -180,12 +193,29 @@ function handleUploadSuccess(res, file) {
 }
 
 // 删除图片
-function handleDelete(file) {
+async function handleDelete(file) {
+  try {
+    // 确认删除提示
+    await proxy.$modal.confirm('是否确认删除此图片？');
+
+    // 调用个性化后台接口
+    if (props.customDeleteApi) {
+      await props.customDeleteApi(file.id);
+    } else {
+      // 这里可使用默认的删除接口，若没有则可以注释掉
+      await delAttachinfo(file.id);
+    }
+
   const findex = fileList.value.map(f => f.name).indexOf(file.name);
   if (findex > -1 && uploadList.value.length === number.value) {
     fileList.value.splice(findex, 1);
     emit("update:modelValue", listToString(fileList.value));
-    return false;
+      proxy.$modal.msgSuccess('删除成功');
+    }
+    return true; // 允许删除操作
+  } catch (error) {
+    proxy.$modal.msgError('删除失败');
+    return false; // 阻止删除操作
   }
 }
 

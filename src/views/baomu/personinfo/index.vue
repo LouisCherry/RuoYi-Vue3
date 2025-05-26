@@ -226,7 +226,7 @@
               'clientguid': scope.row.photoUrlId,
               'rowguid': '',
               'tag': 'portfolio'
-            }" />
+            }" v-model="scope.row.params.imagelist" />
             </template>
           </el-table-column>
         </el-table>
@@ -262,8 +262,9 @@ const title = ref("");
 
 
 
-
 const uploadUrl = ref(import.meta.env.VITE_APP_BASE_API + '/baomu/personinfo/upload');
+
+
 
 const clientguid='';
 const uploadData = ref({
@@ -420,6 +421,7 @@ function handleAddPortfolio() {
   obj.id = crypto.randomUUID();
   obj.title = "";
   obj.photoUrlId = crypto.randomUUID();
+  obj.params ={};
   portfolioList.value.push(obj);
 }
 
