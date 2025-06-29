@@ -131,7 +131,6 @@
 
     <el-table v-loading="loading" :data="personinfoList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-<!--      <el-table-column label="唯一ID" align="center" prop="id" />-->
       <el-table-column label="姓名" align="center" prop="fullName" />
       <el-table-column label="职业类型" align="center" prop="occupation" />
       <el-table-column label="薪资范畴" align="center" prop="salaryRange" />
@@ -226,7 +225,7 @@
               'clientguid': scope.row.photoUrlId,
               'rowguid': '',
               'tag': 'portfolio'
-            }" />
+            }" v-model="scope.row.params.imagelist" />
             </template>
           </el-table-column>
         </el-table>
@@ -420,6 +419,7 @@ function handleAddPortfolio() {
   obj.id = crypto.randomUUID();
   obj.title = "";
   obj.photoUrlId = crypto.randomUUID();
+  obj.params ={};
   portfolioList.value.push(obj);
 }
 
