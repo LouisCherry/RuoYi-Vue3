@@ -1,0 +1,181 @@
+.container{
+    background-size: 100%;
+    height: 100vh;
+    width: 100%;
+    background: url(~@/assets/img/img_bgcolor.png) no-repeat top left #370337 !important;
+    background-size: contain; /* 设置背景图片保持原始尺寸 */
+    background-position: top;
+    background-repeat: no-repeat;
+    background-color:  #d6eaeb;
+    padding-bottom: 40px;
+    overflow-y: auto;
+    .em_top{
+        text-align: center;
+        .em_top_head{
+            margin: 0 auto;
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            position: relative;
+            z-index: 99;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            img{
+                width: 80%;
+                height: 80%;
+                border-radius: 50%;
+            }
+            .em_headtop{
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                bottom: 0;
+                z-index: 100;
+            }
+        }
+        .em_name{
+            font-size: 30px;
+            color: #ffe15a;
+            text-align: center;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        .em_tips{
+            margin: 0 auto;
+            background-color: #ffe15a;
+            color:#370033;
+            padding: 5px 15px;
+            width: 180px;
+            font-size: 20px;
+            border-radius: 25px;
+            margin-top: 10px;
+        }
+        .em_list{
+            display: flex;
+            flex-wrap: wrap;
+            padding: 0 25px;
+            margin-top: 20px;
+            .em_item{
+                display: flex;
+                margin-bottom: 10px;
+                font-size: 14px;
+                color: #5dafc5;
+                min-width: 80px;
+                div{
+                    width: 18px;
+                    height: 18px;
+                    border-radius: 50%;
+                    background: #e5ac39;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin-right: 8px;
+                    img{
+                        width: 12px;
+                        height: 12px;
+                    }
+                }
+            }
+        }
+        .em_img{
+            width: calc(100% - 50px);
+            margin: 15px auto;
+            img{
+                width: 100%;
+            }
+        }
+    }
+    .em_content{
+        .em_show_my{
+            position: relative;
+            width: calc(100% - 50px);
+            margin: 0 auto;
+            min-height: 100px;
+            margin-top: 30px;
+            
+            .em_bgtop{
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+            }
+            .em_line{
+                position: absolute;
+                left: 0;
+                width: 100%;
+            }
+            .em_bgbottom{
+                background: url(~@/assets/img/img_bottom.png) no-repeat bottom left;
+                background-size: 100%;
+                height: 30px;
+            }
+            .em_title{
+                color: #f5d758;
+                text-align: center;
+                background: url(~@/assets/img/img_bgtop.png) no-repeat;
+                background-size: 100%;
+                padding-top: 30px;
+            }
+            // 自我介绍
+            .em_content_text{
+                color: #f5d758;
+                font-size: 12px;
+                padding: 5px 15px;
+                background: url(~@/assets/img/img_line.png) repeat-y;
+                background-size: 100%;
+            }
+            // 证书列表
+            .em_my_card{
+                min-height: 50px;
+                padding: 20px 20px 0px 20px;
+                box-sizing: border-box;
+                border-radius: 3px;
+                font-size: 14px;
+                background: url(~@/assets/img/img_line.png) repeat-y;
+                background-size: 100%;
+                color: #ffe15a;
+                .em_card_list{
+                    display: flex;
+                    flex-wrap: wrap;
+                    .em_card_item{
+                        text-align: left;
+                        width: 50%;
+                        font-size: 12px;
+                        margin-bottom: 10px;
+                        overflow: hidden; /* 隐藏超出部分 */
+                        white-space: nowrap; /* 保持文本在一行 */
+                        text-overflow: ellipsis; /* 超出部分显示省略号 */
+                        span{
+                            font-size: 14px;
+                        }
+                    }
+                }
+            }
+            .em_my_book{
+                min-height: 50px;
+                padding: 20px 10px 0px 10px;
+                box-sizing: border-box;
+                border-radius: 3px;
+                font-size: 14px;
+                background: url(~@/assets/img/img_line.png) repeat-y;
+                background-size: 100%;
+                .em_book_list{
+                    display: flex;
+                    flex-wrap: wrap;
+                    justify-content: space-between;
+                    .em_book_item{
+                        width: 30%;
+                        height: 24vw;
+                        margin-bottom: 10px;
+                        border-radius: 10px;
+                        img{
+                            width: 100%;
+                            height: 100%;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,6 +1,7 @@
 import { createWebHistory, createRouter } from 'vue-router'
 /* Layout */
 import Layout from '@/layout'
+import HomeView from '../views/HomeView.vue'
 
 /**
  * Note: 路由配置项
@@ -83,6 +84,16 @@ export const constantRoutes = [
         meta: { title: '个人中心', icon: 'user' }
       }
     ]
+  },
+  {
+    path: '/home',
+    name: 'homePage', // 修改路由名称，避免与其他可能的同名路由冲突
+    component: HomeView
+  },
+  {
+    path: '/about',
+    name: 'about',
+    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
   }
 ]
 
