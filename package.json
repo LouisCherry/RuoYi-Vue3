@@ -32,10 +32,12 @@
     "jsencrypt": "3.3.2",
     "nprogress": "0.2.0",
     "pinia": "2.1.7",
-    "vant": "3.6.12",
+    "vant": "^4.0.0",
     "vue": "3.5.17",
     "vue-cropper": "1.1.1",
-    "vue-router": "4.4.0"
+    "vue-router": "4.4.0",
+    "lodash": "4.17.21",
+    "dayjs": "1.11.10"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "5.0.5",
