@@ -174,13 +174,13 @@ input[type=search] {
   font-weight: 400;
 }
 
-/*html body .van-nav-bar {*/
-/*  position: fixed;*/
-/*  top: var(--m8-nav-bar-top, 0);*/
-/*  left: 0;*/
-/*  right: 0;*/
-/*  z-index: 1;*/
-/*}*/
+html body .van-nav-bar {
+  position: fixed;
+  top: var(--m8-nav-bar-top, 0);
+  left: 0;
+  right: 0;
+  z-index: 1;
+}
 
 .container, .van-content {
     position: relative;

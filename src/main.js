@@ -72,7 +72,7 @@ app.use(plugins)
 app.use(elementIcons)
 app.component('svg-icon', SvgIcon)
 
-app.provide('useMock', true);
+app.provide('useMock', false);
 
 directive(app)
 

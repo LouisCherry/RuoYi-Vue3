@@ -10,7 +10,7 @@
           <div class="em_user">
             <div class="em_name">{{ personalInfo.fullName }}</div>
             <div class="em_p1">{{ personalInfo.occupation }}</div>
-            <div class="em_p2">{{ personalInfo.salaryRange }}</div>
+            <div class="em_p2">¥{{ personalInfo.salaryRange }}</div>
           </div>
           <!-- 头像 -->
           <div class="em_head">
@@ -107,7 +107,7 @@
 
 <!-- js部分 -->
 <script>
-import { fetchData } from '../api/api'
+import {publicresumeinfo} from "@/api/baomu/personinfo";
 import { Toast, ImagePreview } from 'vant'
 import 'vant/lib/toast/index.css'
 import 'vant/lib/image-preview/index.css'
@@ -130,12 +130,12 @@ export default {
   // 实例数据创建完成后调用
   created () {
     // 获取数据
-    this.resumeId = this.$route.query.resumeId || ''
-    fetchData('api/publicresumeinfo', { resumeId: this.resumeId }).then(res => {
+    this.resumeId = this.$route.query.resumeId || '1'
+    publicresumeinfo(this.resumeId).then(res => {
       console.log(res)
-      if (res.success) {
+      if (res.code=200) {
         // 正确回调
-        this.personalInfo = res.data.personalInfo
+        this.personalInfo = res.data
         this.selfIntroduction = res.data.selfIntroduction
         this.portfolio = res.data.portfolio
         this.certificates = res.data.certificates
@@ -143,6 +143,18 @@ export default {
         Toast(res.errorMessage)
       }
     })
+    // fetchData('baomu/personinfo/publicresumeinfo', { resumeId: this.resumeId }).then(res => {
+    //   console.log(res)
+    //   if (res.success) {
+    //     // 正确回调
+    //     this.personalInfo = res.data.personalInfo
+    //     this.selfIntroduction = res.data.selfIntroduction
+    //     this.portfolio = res.data.portfolio
+    //     this.certificates = res.data.certificates
+    //   } else {
+    //     Toast(res.errorMessage)
+    //   }
+    // })
   },
   // 实例DOM被挂载后调用
   mounted () { },

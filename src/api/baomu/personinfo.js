@@ -42,3 +42,11 @@ export function delPersoninfo(id) {
     method: 'delete'
   })
 }
+
+// 删除保姆个人信息
+export function publicresumeinfo(id) {
+  return request({
+    url: '/baomu/personinfo/publicresumeinfo/' + id,
+    method: 'get'
+  })
+}

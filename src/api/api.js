@@ -14,9 +14,9 @@ function fetchData(url, data) {
     }
     if (useMock) {
       // 使用 mock 数据
-      if (url === 'api/privateresumeinfo') {
+      if (url === 'baomu/personinfo/privateresumeinfo') {
         resolve(getPrivateresumeinfoData());
-      } else if (url === 'api/publicresumeinfo') {
+      } else if (url === 'baomu/personinfo/publicresumeinfo') {
         resolve(getPublicresumeinfoData());
       }
     } else {

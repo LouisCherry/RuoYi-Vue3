@@ -2,6 +2,8 @@
   <router-view />
 </template>
 
+
+
 <script setup>
 import useSettingsStore from '@/store/modules/settings'
 import { handleThemeStyle } from '@/utils/theme'
