@@ -20,7 +20,7 @@ export const getPrivateresumeinfoData = () => {
         photoUrl: 'https://inews.gtimg.com/om_bt/OE8piEBa-tbqn-wNvWZl8coi4AlzoUD43upEkoAnIkYL8AA/641'
       },
       selfIntroduction: '这是自我介绍，要返回富文本',
-      certificates: ['证书1', '证书2', '证书3', '证书4', '证书5', '证书6'],
+      certificateList: ['证书1', '证书2', '证书3', '证书4', '证书5', '证书6'],
       portfolio: [
         {
           title: '爱好',
@@ -55,7 +55,7 @@ export const getPublicresumeinfoData = () => {
         photoUrl: 'https://inews.gtimg.com/om_bt/OE8piEBa-tbqn-wNvWZl8coi4AlzoUD43upEkoAnIkYL8AA/641'
       },
       selfIntroduction: '这是自我介绍，要返回富文本',
-      certificates: ['证书1', '证书2', '证书3', '证书4', '证书5', '证书6'],
+      certificateList: ['证书1', '证书2', '证书3', '证书4', '证书5', '证书6'],
       portfolio: [
         {
           title: '爱好',

@@ -148,6 +148,7 @@
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['baomu:personinfo:edit']">修改</el-button>
           <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['baomu:personinfo:remove']">删除</el-button>
+          <el-button link type="primary" icon="Link" @click="handleOpenLink(scope.row)">打开链接</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -202,6 +203,33 @@
         <el-form-item label="自我介绍" prop="selfIntroduction">
           <el-input v-model="form.selfIntroduction" type="textarea" placeholder="请输入内容" />
         </el-form-item>
+
+        <!-- 证书信息区域 -->
+        <el-divider content-position="center">证书信息</el-divider>
+        <el-row :gutter="10" class="mb8">
+          <el-col :span="1.5">
+            <el-button type="primary" icon="Plus" @click="handleAddCertificate">添加证书</el-button>
+          </el-col>
+          <el-col :span="1.5">
+            <el-button type="danger" icon="Delete" @click="handleDeleteCertificate">删除选中</el-button>
+          </el-col>
+        </el-row>
+        <el-table
+            :data="certificateList"
+            :row-class-name="rowCertificateIndex"
+            @selection-change="handleCertificateSelectionChange"
+            ref="certificates"
+            border
+        >
+          <el-table-column type="selection" width="50" align="center" />
+          <el-table-column label="序号" type="index" width="60" align="center" />
+          <el-table-column label="证书名称" prop="certificateName" width="400">
+            <template #default="scope">
+              <el-input v-model="scope.row.certificateName" placeholder="请输入证书名称" />
+            </template>
+          </el-table-column>
+        </el-table>
+
         <el-divider content-position="center">作品集合信息</el-divider>
         <el-row :gutter="10" class="mb8">
           <el-col :span="1.5">
@@ -248,11 +276,14 @@ const { proxy } = getCurrentInstance();
 
 const personinfoList = ref([]);
 const portfolioList = ref([]);
+// 证书相关数据
+const certificateList = ref([]);
 const open = ref(false);
 const loading = ref(true);
 const showSearch = ref(true);
 const ids = ref([]);
 const checkedPortfolio = ref([]);
+const checkedCertificates = ref([]);
 const single = ref(true);
 const multiple = ref(true);
 const total = ref(0);
@@ -334,6 +365,7 @@ function reset() {
     selfIntroduction: null
   };
   portfolioList.value = [];
+  certificateList.value = []; // 重置证书列表
   proxy.resetForm("personinfoRef");
 }
 
@@ -369,10 +401,19 @@ function handleUpdate(row) {
   const _id = row.id || ids.value
   getPersoninfo(_id).then(response => {
     form.value = response.data;
-    portfolioList.value = response.data.portfolioList;
+    portfolioList.value = response.data.portfolioList || [];
+    certificateList.value = response.data.certificateList || [];
     open.value = true;
     title.value = "修改保姆个人信息";
   });
+}
+
+// 打开链接
+function handleOpenLink(row) {
+  // 构建新页面地址，使用当前域名拼接路径和参数
+  const url = `${window.location.origin}/about?resumeId=${row.id}`;
+  // 打开新页面
+  window.open(url, '_blank');
 }
 
 /** 提交按钮 */
@@ -380,6 +421,14 @@ function submitForm() {
   proxy.$refs["personinfoRef"].validate(valid => {
     if (valid) {
       form.value.portfolioList = portfolioList.value;
+      // 处理证书数据（与作品集合格式保持一致）
+      form.value.certificateList = certificateList.value
+          .filter(item => item.certificateName?.trim()) // 过滤空值
+          .map(item => ({
+            id: item.id,
+            person_info_id: form.value.id, // 关联当前人员ID
+            certificateName: item.certificateName.trim() // 去除首尾空格
+          }));
       if (form.value.id != null) {
         updatePersoninfo(form.value).then(response => {
           proxy.$modal.msgSuccess("修改成功");
@@ -447,6 +496,45 @@ function handleExport() {
     ...queryParams.value
   }, `personinfo_${new Date().getTime()}.xlsx`)
 }
+
+
+
+
+/** 证书序号维护 */
+function rowCertificateIndex({ row, rowIndex }) {
+  row.index = rowIndex + 1;
+}
+
+/** 证书选择变更事件 */
+function handleCertificateSelectionChange(selection) {
+  checkedCertificates.value = selection.map(item => item.index);
+}
+
+/** 证书添加按钮操作 */
+function handleAddCertificate() {
+  let obj = {};
+  obj.id = crypto.randomUUID(); // 生成唯一ID
+  obj.certificateName = ""; // 证书名称初始为空
+  certificateList.value.push(obj);
+}
+
+/** 证书删除按钮操作 */
+function handleDeleteCertificate() {
+  if (checkedCertificates.value.length === 0) {
+    proxy.$modal.msgError("请先选择要删除的证书数据");
+  } else {
+    const certificateList = certificateList.value;
+    const checked = checkedCertificates.value;
+    // 过滤掉选中的证书（通过序号匹配）
+    certificateList.value = certificateList.filter(item => {
+      return checked.indexOf(item.index) === -1;
+    });
+    // 清空选中状态
+    checkedCertificates.value = [];
+  }
+}
+
+
 
 getList();
 </script>

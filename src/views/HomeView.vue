@@ -57,7 +57,7 @@
         <div class="em_title">我的证书</div>
         <div class="em_my_card">
           <ul class="em_card_list" >
-            <li class="em_card_item" v-for="( item,index ) in certificates" :key="index">
+            <li class="em_card_item" v-for="( item,index ) in certificateList" :key="index">
               <span>◎</span>{{ item }}
             </li>
           </ul>
@@ -91,7 +91,7 @@ export default {
   // 定义用到的数据，在template中使用{{ }}包裹，自动实现绑定
   data () {
     return {
-      certificates: '',
+      certificateList: '',
       personalInfo: '',
       portfolio: '',
       selfIntroduction: ''
@@ -112,7 +112,7 @@ export default {
         this.personalInfo = res.data.personalInfo
         this.selfIntroduction = res.data.selfIntroduction
         this.portfolio = res.data.portfolio
-        this.certificates = res.data.certificates
+        this.certificateList = res.data.certificateList
       } else {
         Toast(res.errorMessage)
       }
