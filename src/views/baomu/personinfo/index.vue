@@ -164,6 +164,21 @@
     <!-- 添加或修改保姆个人信息对话框 -->
     <el-dialog :title="title" v-model="open" width="700px" append-to-body>
       <el-form ref="personinfoRef" :model="form" :rules="rules" label-width="80px">
+        <!-- 头像上传区域 -->
+        <el-form-item label="头像" prop="avatar">
+          <div class="avatar-upload-container">
+            <image-upload
+                :action="uploadUrl"
+                :data="{
+                  'clientguid': '',
+                  'rowguid': form.avatar,
+                  'tag': 'avatar'
+                }"
+                v-model="form.params.avatarurl"
+                :limit="1"
+            />
+          </div>
+        </el-form-item>
         <el-form-item label="姓名" prop="fullName">
           <el-input v-model="form.fullName" placeholder="请输入姓名" />
         </el-form-item>
@@ -271,6 +286,8 @@
 <script setup name="Personinfo">
 import { listPersoninfo, getPersoninfo, delPersoninfo, addPersoninfo, updatePersoninfo } from "@/api/baomu/personinfo";
 import { ref } from 'vue';
+import { createUniqueString } from '@/utils/index'
+
 
 const { proxy } = getCurrentInstance();
 
@@ -293,6 +310,7 @@ const title = ref("");
 
 
 
+
 const uploadUrl = ref(import.meta.env.VITE_APP_BASE_API + '/baomu/personinfo/upload');
 
 const clientguid='';
@@ -303,7 +321,8 @@ const uploadData = ref({
 });
 
 const data = reactive({
-  form: {},
+  form: {
+  },
   queryParams: {
     pageNum: 1,
     pageSize: 10,
@@ -350,6 +369,7 @@ function cancel() {
 function reset() {
   form.value = {
     id: null,
+    avatar: null,
     fullName: null,
     occupation: null,
     salaryRange: null,
@@ -362,10 +382,12 @@ function reset() {
     phone: null,
     workExperience: null,
     skillsAndStrengths: null,
-    selfIntroduction: null
+    selfIntroduction: null,
+    params : {}
   };
   portfolioList.value = [];
   certificateList.value = []; // 重置证书列表
+  // initAvatar('');  // 重置头像
   proxy.resetForm("personinfoRef");
 }
 
@@ -401,8 +423,11 @@ function handleUpdate(row) {
   const _id = row.id || ids.value
   getPersoninfo(_id).then(response => {
     form.value = response.data;
+    form.value.params=response.data.params ? response.data.params:{};
     portfolioList.value = response.data.portfolioList || [];
     certificateList.value = response.data.certificateList || [];
+    // // 初始化头像
+    // initAvatar(response.data.avatar,response.data.params,avatarurl);
     open.value = true;
     title.value = "修改保姆个人信息";
   });
@@ -533,6 +558,7 @@ function handleDeleteCertificate() {
     checkedCertificates.value = [];
   }
 }
+
 
 
 
