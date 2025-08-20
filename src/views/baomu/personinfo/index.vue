@@ -171,7 +171,7 @@
                 :action="uploadUrl"
                 :data="{
                   'clientguid': '',
-                  'rowguid': form.avatar,
+                  'rowguid': avatarRowguid || (avatarRowguid = createUniqueString()),
                   'tag': 'avatar'
                 }"
                 v-model="form.params.avatarurl"
@@ -305,6 +305,10 @@ const single = ref(true);
 const multiple = ref(true);
 const total = ref(0);
 const title = ref("");
+
+// 存储头像上传时的rowguid
+const avatarRowguid = ref('');
+
 
 
 
@@ -445,6 +449,8 @@ function handleOpenLink(row) {
 function submitForm() {
   proxy.$refs["personinfoRef"].validate(valid => {
     if (valid) {
+      //头像图片
+      form.value.avatar=avatarRowguid.value;
       form.value.portfolioList = portfolioList.value;
       // 处理证书数据（与作品集合格式保持一致）
       form.value.certificateList = certificateList.value

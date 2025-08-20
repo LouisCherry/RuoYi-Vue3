@@ -281,12 +281,25 @@ export function uniqueArr(arr) {
 }
 
 /**
- * @returns {string}
+ * 生成标准UUID v4（符合RFC4122规范）
+ * @returns {string} 格式为xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx的UUID
  */
 export function createUniqueString() {
-  const timestamp = +new Date() + ''
-  const randomNum = parseInt((1 + Math.random()) * 65536) + ''
-  return (+(randomNum + timestamp)).toString(32)
+  // 生成16字节的随机值（128位）
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+
+  // UUID v4 特定格式：第6位固定为4（表示版本）
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  // 第8位固定为8、9、a或b（表示变体）
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+
+  // 转换为十六进制字符串并添加分隔符
+  return Array.from(bytes, (b, i) => {
+    // 按位置添加分隔符：8-4-4-4-12
+    const hex = b.toString(16).padStart(2, '0');
+    return [4, 6, 8, 10].includes(i) ? `-${hex}` : hex;
+  }).join('');
 }
 
 /**
