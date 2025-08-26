@@ -1,20 +1,20 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="用户关联ID" prop="userId">
+      <el-form-item label="用户名称" prop="userName">
         <el-input
-          v-model="queryParams.userId"
-          placeholder="请输入用户关联ID"
-          clearable
-          @keyup.enter="handleQuery"
+            v-model="queryParams.userName"
+            placeholder="请输入用户名称"
+            clearable
+            @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="租户截止时间" prop="tenantEndTime">
+      <el-form-item label="截止时间" prop="tenantEndTime">
         <el-date-picker clearable
           v-model="queryParams.tenantEndTime"
           type="date"
           value-format="YYYY-MM-DD"
-          placeholder="请选择租户截止时间">
+          placeholder="请选择截止时间">
         </el-date-picker>
       </el-form-item>
       <el-form-item>
@@ -67,8 +67,8 @@
 
     <el-table v-loading="loading" :data="tenantList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="编号" align="center" prop="id" />
-      <el-table-column label="用户关联ID" align="center" prop="userId" />
+<!--      <el-table-column label="编号" align="center" prop="id" />-->
+      <el-table-column label="用户" align="center" prop="userName" />
       <el-table-column label="租户截止时间" align="center" prop="tenantEndTime" width="180">
         <template #default="scope">
           <span>{{ parseTime(scope.row.tenantEndTime, '{y}-{m}-{d}') }}</span>
@@ -100,10 +100,31 @@
     <!-- 添加或修改租户清单对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="tenantRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="用户关联ID" prop="userId">
-          <el-input v-model="form.userId" placeholder="请输入用户关联ID" />
+        <el-form-item label="选择用户" prop="userId">
+          <el-row :gutter="10">
+            <el-col :span="16">
+              <el-input
+                  v-model="form.userName"
+                  placeholder="请选择系统用户"
+                  readonly
+                  style="cursor: pointer"
+              />
+              <!-- 存储实际提交的用户ID（隐藏） -->
+              <el-input
+                  v-model="form.userId"
+                  type="hidden"
+              />
+            </el-col>
+            <el-col :span="8">
+              <el-button
+                  type="primary"
+                  icon="User"
+                  @click="openSelectUserDialog"
+              >选择用户</el-button>
+            </el-col>
+          </el-row>
         </el-form-item>
-        <el-form-item label="租户截止时间" prop="tenantEndTime">
+        <el-form-item label="截止时间" prop="tenantEndTime">
           <el-date-picker clearable
             v-model="form.tenantEndTime"
             type="date"
@@ -122,13 +143,101 @@
         </div>
       </template>
     </el-dialog>
+
+
+
+    <!-- 系统用户选择弹窗（复用角色授权的用户选择组件逻辑） -->
+    <el-dialog
+        title="选择系统用户"
+        v-model="selectUserVisible"
+        width="800px"
+        top="5vh"
+        append-to-body
+    >
+      <!-- 搜索区域 -->
+      <el-form :model="userQueryParams" ref="userQueryRef" :inline="true">
+        <el-form-item label="用户名称" prop="userName">
+          <el-input
+              v-model="userQueryParams.userName"
+              placeholder="请输入用户名称"
+              clearable
+              style="width: 180px"
+              @keyup.enter="getUserList"
+          />
+        </el-form-item>
+        <el-form-item label="手机号码" prop="phonenumber">
+          <el-input
+              v-model="userQueryParams.phonenumber"
+              placeholder="请输入手机号码"
+              clearable
+              style="width: 180px"
+              @keyup.enter="getUserList"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" icon="Search" @click="getUserList">搜索</el-button>
+          <el-button icon="Refresh" @click="resetUserQuery">重置</el-button>
+        </el-form-item>
+      </el-form>
+
+      <!-- 用户列表 -->
+      <el-table
+          @row-click="clickUserRow"
+          ref="userTableRef"
+          :data="userList"
+          @selection-change="handleUserSelectionChange"
+          height="300px"
+      >
+        <el-table-column type="selection" width="55"></el-table-column>
+        <el-table-column label="用户名称" prop="userName" :show-overflow-tooltip="true" />
+        <el-table-column label="用户昵称" prop="nickName" :show-overflow-tooltip="true" />
+        <el-table-column label="手机" prop="phonenumber" :show-overflow-tooltip="true" />
+        <el-table-column label="状态" align="center" prop="status">
+          <template #default="scope">
+            <dict-tag :options="sys_normal_disable" :value="scope.row.status" />
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <!-- 分页 -->
+      <pagination
+          v-show="userTotal > 0"
+          :total="userTotal"
+          v-model:page="userQueryParams.pageNum"
+          v-model:limit="userQueryParams.pageSize"
+          @pagination="getUserList"
+      />
+
+      <!-- 弹窗按钮 -->
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button type="primary" @click="confirmSelectUser">确 定</el-button>
+          <el-button @click="selectUserVisible = false">取 消</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
+
+
 <script setup name="Tenant">
 import { listTenant, getTenant, delTenant, addTenant, updateTenant } from "@/api/baomu/tenant"
+import { listUser } from "@/api/system/user"; // 导入系统用户查询接口
+import { getCurrentInstance } from "vue";
 
-const { proxy } = getCurrentInstance()
+// 组件实例
+const { proxy } = getCurrentInstance();
+// 状态字典（启用/禁用）
+const { sys_normal_disable } = proxy.useDict("sys_normal_disable");
+
+
+// 用户选择弹窗相关变量
+const selectUserVisible = ref(false); // 弹窗显示状态
+const userList = ref([]); // 系统用户列表
+const userTotal = ref(0); // 用户总数
+const selectedUser = ref(null); // 选中的用户
+
 
 const tenantList = ref([])
 const open = ref(false)
@@ -147,15 +256,78 @@ const data = reactive({
     pageSize: 10,
     userId: null,
     tenantEndTime: null,
+    userName: null
   },
   rules: {
     userId: [
-      { required: true, message: "用户关联ID不能为空", trigger: "blur" }
+      { required: true, message: "用户不能为空", trigger: "blur" }
     ],
   }
 })
 
 const { queryParams, form, rules } = toRefs(data)
+
+
+// 用户查询参数
+const userQueryParams = reactive({
+  pageNum: 1,
+  pageSize: 10,
+  userName: undefined,
+  phonenumber: undefined
+});
+
+// 打开用户选择弹窗
+function openSelectUserDialog() {
+  selectUserVisible.value = true;
+  getUserList(); // 加载用户列表
+}
+
+// 查询系统用户列表
+function getUserList() {
+  listUser(userQueryParams).then(res => {
+    userList.value = res.rows;
+    userTotal.value = res.total;
+  });
+}
+
+// 重置用户查询条件
+function resetUserQuery() {
+  proxy.resetForm("userQueryRef");
+  userQueryParams.pageNum = 1;
+  getUserList();
+}
+
+// 选中用户行
+function clickUserRow(row) {
+  proxy.$refs["userTableRef"].toggleRowSelection(row);
+}
+
+// 处理用户选择
+function handleUserSelectionChange(selection) {
+  if (selection.length > 0) {
+    selectedUser.value = selection[0]; // 仅支持单选
+  } else {
+    selectedUser.value = null;
+  }
+}
+
+// 确认选择用户
+function confirmSelectUser() {
+  if (!selectedUser.value) {
+    proxy.$modal.msgError("请选择用户");
+    return;
+  }
+  // 赋值给表单
+  form.value.userId = selectedUser.value.userId;
+  form.value.userName = selectedUser.value.userName;
+  selectUserVisible.value = false;
+}
+
+// 在表单验证规则中添加（如果需要）
+// const rules = reactive({
+//   // 其他规则...
+//   userId: [{ required: true, message: "请选择关联用户", trigger: "blur" }]
+// });
 
 /** 查询租户清单列表 */
 function getList() {
@@ -183,7 +355,8 @@ function reset() {
     createTime: null,
     updateBy: null,
     updateTime: null,
-    remark: null
+    remark: null,
+    userName: null
   }
   proxy.resetForm("tenantRef")
 }
