@@ -1,6 +1,10 @@
 <!-- html部分 -->
 <template>
-  <div class="container">
+  <!-- 当 isenable 为 0 时显示服务到期提示 -->
+  <div v-if="personalInfo.isenable !== undefined && (!personalInfo.isenable || personalInfo.isenable === '0')" class="expired-container">
+    <div class="expired-message">您的服务到期</div>
+  </div>
+  <div v-else class="container">
     <!-- 顶部用户展示 -->
     <div class="em-content">
       <!-- 顶部展示 -->
@@ -8,46 +12,56 @@
         <div class="em_top_left">
           <!-- 基本信息 -->
           <div class="em_user">
-            <div class="em_name">{{ personalInfo.fullName }}</div>
-            <div class="em_p1">{{ personalInfo.occupation }}</div>
-            <div class="em_p2">¥{{ personalInfo.salaryRange }}</div>
+            <!-- 姓名：无值时不显示 -->
+            <div v-if="personalInfo.fullName" class="em_name">{{ personalInfo.fullName }}</div>
+            <!-- 职业：无值时不显示 -->
+            <div v-if="personalInfo.occupation" class="em_p1">{{ personalInfo.occupation }}</div>
+            <!-- 薪资：无值时不显示 -->
+            <div v-if="personalInfo.salaryRange" class="em_p2">¥{{ personalInfo.salaryRange }}</div>
           </div>
-          <!-- 头像 -->
-          <div class="em_head">
-            <img :src="personalInfo.photoUrl" alt="">
+          <!-- 头像：无图片路径时不显示 -->
+          <div v-if="personalInfo.photoUrl" class="em_head">
+            <img :src="getRealPhotoUrl(personalInfo.photoUrl)" alt="">
           </div>
         </div>
         <div class="em_top_right">
           <ul class="em_list">
-            <li class="em_item">
+            <!-- 年龄：无值时不显示 -->
+            <li v-if="personalInfo.age" class="em_item">
               <div><img src="@/assets/img/icon_1.png" alt=""></div>
               <span>{{ personalInfo.age }}</span>
             </li>
-            <li class="em_item">
+            <!-- 民族：无值时不显示 -->
+            <li v-if="personalInfo.ethnicGroup" class="em_item">
               <div><img src="@/assets/img/icon_2.png" alt=""></div>
               <span>{{ personalInfo.ethnicGroup }}</span>
             </li>
-            <li class="em_item">
+            <!-- 生肖：无值时不显示 -->
+            <li v-if="personalInfo.zodiac" class="em_item">
               <div><img src="@/assets/img/icon_5.png" alt=""></div>
               <span>{{ personalInfo.zodiac }}</span>
             </li>
-            <li class="em_item">
+            <!-- 星座：无值时不显示 -->
+            <li v-if="personalInfo.constellation" class="em_item">
               <div><img src="@/assets/img/icon_3.png" alt=""></div>
               <span>{{ personalInfo.constellation }}</span>
             </li>
-            <li class="em_item">
+            <!-- 省份：无值时不显示 -->
+            <li v-if="personalInfo.province" class="em_item">
               <div><img src="@/assets/img/icon_4.png" alt=""></div>
               <span>{{ personalInfo.province }}</span>
             </li>
-            <li class="em_item">
+            <!-- 学历：无值时不显示 -->
+            <li v-if="personalInfo.education" class="em_item">
               <div><img src="@/assets/img/icon_6.png" alt=""></div>
               <span>{{ personalInfo.education }}</span>
             </li>
-            <li class="em_item em_item_more">
+            <li v-if="personalInfo.workExperience" class="em_item em_item_more">
               <div><img src="@/assets/img/icon_7.png" alt=""></div>
               <span>{{ personalInfo.workExperience }}</span>
             </li>
-            <li class="em_item em_item_more">
+            <!-- 技能特长：无值时不显示 -->
+            <li v-if="personalInfo.skillsAndStrengths" class="em_item em_item_more">
               <div><img src="@/assets/img/icon_8.png" alt=""></div>
               <span>{{ personalInfo.skillsAndStrengths }}</span>
             </li>
@@ -73,7 +87,9 @@
       </div>
       <div class="em_my_content" v-html="selfIntroduction"></div>
     </div>
-    <div class="em_show_my">
+
+    <!-- 我的证书：无证书列表时不显示整个区块 -->
+    <div v-if="certificateList && certificateList.length" class="em_show_my">
       <div class="em_my_title">
         我的证书
       </div>
@@ -92,33 +108,48 @@
       <div class="em_my_book">
         <ul class="em_book_list">
           <li class="em_book_item" v-for="( it, ind ) in item.photoUrls" :key="ind">
-            <img @click="preViewImg(it)" :src="it" alt="">
+            <ImagePreview :src="it" width="100px" height="100px" />
           </li>
         </ul>
       </div>
     </div>
-    <!-- 电话 -->
-    <div class="em_call" @click="openCall(personalInfo.phone)">
+
+    <!-- 电话咨询：无电话号码时不显示 -->
+    <div v-if="personalInfo.phone" class="em_call" @click="openCall(personalInfo.phone)">
       <img src="@/assets/img/img_phone.png" alt="">
       电话咨询
     </div>
+    <!-- 放在页面底部，隐藏不显示，仅用于调用预览逻辑 -->
+<!--
+    <ImagePreview ref="imagePreview" style="display: none;" />
+-->
+    <!-- 使用别名进行调用 -->
+    <van-image-preview :show="isPreviewVisible" :images="imageList" />
+
   </div>
 </template>
 
 <!-- js部分 -->
 <script>
 import {publicresumeinfo} from "@/api/baomu/personinfo";
-import { Toast, ImagePreview } from 'vant'
+import { Toast} from 'vant'
+import { isExternal } from "@/utils/validate"; // 引入外部链接判断工具
 import 'vant/lib/toast/index.css'
 import 'vant/lib/image-preview/index.css'
+import ImagePreview from "@/components/ImagePreview/index.vue";
+// import { ImagePreview as VanImagePreview } from 'vant';
+
+
 export default {
   name: 'aboutName',
-  components: {},
+  components: {
+    ImagePreview
+  },
   // 定义用到的数据，在template中使用{{ }}包裹，自动实现绑定
   data () {
     return {
       certificateList: '',
-      personalInfo: '',
+      personalInfo: {}, // 初始化为空对象，避免 undefined 报错
       portfolio: '',
       selfIntroduction: ''
     }
@@ -159,6 +190,14 @@ export default {
   // 实例DOM被挂载后调用
   mounted () { },
   methods: {
+    // 将 getRealPhotoUrl 定义在 methods 中，确保能访问到 import 的变量
+    getRealPhotoUrl(url) {
+      if (!url) return "";
+      // 若为外部链接（如 http:// 开头），直接返回
+      if (isExternal(url)) return url;
+      // 否则拼接基础 API 地址
+      return import.meta.env.VITE_APP_BASE_API + url;
+    },
     openCall (phone) {
       if (phone) {
         window.location.href = 'tel:' + phone
@@ -166,15 +205,8 @@ export default {
         Toast('暂无联系方式')
       }
     },
-    preViewImg (it) {
-      ImagePreview(
-        {
-          images: [it],
-          showIndex: false
-        })
-    }
   }
-}
+};
 </script>
 
 <!-- css部分 -->

@@ -29,7 +29,16 @@ export function addPersoninfo(data) {
 // 修改保姆个人信息
 export function updatePersoninfo(data) {
   return request({
-    url: '/baomu/personinfo',
+    url: '/baomu/personinfo/full',
+    method: 'put',
+    data: data
+  })
+}
+
+// 修改保姆个人信息/单字段修改
+export function updatePersoninfoSingle(data) {
+  return request({
+    url: '/baomu/personinfo/single',
     method: 'put',
     data: data
   })

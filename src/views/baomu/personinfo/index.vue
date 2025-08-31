@@ -143,12 +143,25 @@
       <el-table-column label="联系电话" align="center" prop="phone" />
       <el-table-column label="工作经验" align="center" prop="workExperience" />
       <el-table-column label="技能与优势" align="center" prop="skillsAndStrengths" />
+<!--
       <el-table-column label="自我介绍" align="center" prop="selfIntroduction" />
+-->
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['baomu:personinfo:edit']">修改</el-button>
           <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['baomu:personinfo:remove']">删除</el-button>
-          <el-button link type="primary" icon="Link" @click="handleOpenLink(scope.row)">打开链接</el-button>
+          <el-button link type="primary" icon="Link" @click="handleOpenLink(scope.row)" v-if="isAdmin || scope.row.isenable === '1'">打开链接</el-button>
+        </template>
+      </el-table-column>
+      <!-- 在操作列之前添加 -->
+      <el-table-column label="是否启用" align="center" v-if="isAdmin">
+        <template #default="scope">
+          <el-switch
+              v-model="scope.row.isenable"
+              active-value="1"
+              inactive-value="0"
+              @change="handleIsEnableChange(scope.row)"
+          ></el-switch>
         </template>
       </el-table-column>
     </el-table>
@@ -284,9 +297,18 @@
 </template>
 
 <script setup name="Personinfo">
-import { listPersoninfo, getPersoninfo, delPersoninfo, addPersoninfo, updatePersoninfo } from "@/api/baomu/personinfo";
+import {
+  listPersoninfo,
+  getPersoninfo,
+  delPersoninfo,
+  addPersoninfo,
+  updatePersoninfo,
+  updatePersoninfoSingle
+} from "@/api/baomu/personinfo";
 import { ref } from 'vue';
 import { createUniqueString } from '@/utils/index'
+import useUserStore from '@/store/modules/user'
+
 
 
 const { proxy } = getCurrentInstance();
@@ -308,7 +330,27 @@ const title = ref("");
 
 // 存储头像上传时的rowguid
 const avatarRowguid = ref('');
+// 判断是否为管理员（假设管理员角色标识为'admin'）
+const userStore = useUserStore()
+const isAdmin = computed(() => {
+  return userStore.roles.includes('admin')
+})
 
+
+// 处理启用状态变更
+function handleIsEnableChange(row) {
+  // 发送请求更新状态
+  updatePersoninfoSingle({
+    id: row.id,
+    isenable: row.isenable
+  }).then(response => {
+    proxy.$modal.msgSuccess("状态更新成功");
+    getList(); // 刷新列表
+  }).catch(() => {
+    // 失败时回滚状态
+    row.isenable = row.isenable === '1' ? '0' : '1';
+  });
+}
 
 
 
@@ -387,6 +429,7 @@ function reset() {
     workExperience: null,
     skillsAndStrengths: null,
     selfIntroduction: null,
+    isenable: '0', // 默认不启用
     params : {}
   };
   portfolioList.value = [];
@@ -427,11 +470,11 @@ function handleUpdate(row) {
   const _id = row.id || ids.value
   getPersoninfo(_id).then(response => {
     form.value = response.data;
-    form.value.params=response.data.params ? response.data.params:{};
+    form.value.params = response.data.params || {};
     portfolioList.value = response.data.portfolioList || [];
     certificateList.value = response.data.certificateList || [];
-    // // 初始化头像
-    // initAvatar(response.data.avatar,response.data.params,avatarurl);
+    // 新增：回显头像rowguid（关键修复）
+    avatarRowguid.value = form.value.avatar || '';
     open.value = true;
     title.value = "修改保姆个人信息";
   });
@@ -496,9 +539,9 @@ function rowPortfolioIndex({ row, rowIndex }) {
 /** 作品集合添加按钮操作 */
 function handleAddPortfolio() {
   let obj = {};
-  obj.id = crypto.randomUUID();
+  obj.id = createUniqueString();
   obj.title = "";
-  obj.photoUrlId = crypto.randomUUID();
+  obj.photoUrlId = createUniqueString();
   obj.params ={};
   portfolioList.value.push(obj);
 }
@@ -544,7 +587,7 @@ function handleCertificateSelectionChange(selection) {
 /** 证书添加按钮操作 */
 function handleAddCertificate() {
   let obj = {};
-  obj.id = crypto.randomUUID(); // 生成唯一ID
+  obj.id = createUniqueString(); // 生成唯一ID
   obj.certificateName = ""; // 证书名称初始为空
   certificateList.value.push(obj);
 }

@@ -11,17 +11,24 @@ import usePermissionStore from '@/store/modules/permission'
 
 NProgress.configure({ showSpinner: false });
 
-const whiteList = ['/login', '/register',  '/home', '/about'];
+const whiteList = ['/login', '/register',  '/home', '/about', '/profile/upload/*'];
 
 router.beforeEach((to, from, next) => {
   NProgress.start()
+  // 移到内部并依赖当前路由to.path
+const isWhiteList = whiteList.some(item => {
+  // 将白名单中的*替换为正则表达式（.*），实现模糊匹配
+  const reg = new RegExp(`^${item.replace(/\*/g, '.*')}$`);
+  return reg.test(to.path);
+});
+
   if (getToken()) {
     to.meta.title && useSettingsStore().setTitle(to.meta.title)
     /* has token*/
     if (to.path === '/login') {
       next({ path: '/' })
       NProgress.done()
-    } else if (whiteList.indexOf(to.path) !== -1) {
+    } else if (isWhiteList) {
       next()
     } else {
       if (useUserStore().roles.length === 0) {
@@ -49,9 +56,8 @@ router.beforeEach((to, from, next) => {
       }
     }
   } else {
-    // 没有token
-    if (whiteList.indexOf(to.path) !== -1) {
-      // 在免登录白名单，直接进入
+    // 未登录时也使用通配符校验逻辑
+    if (isWhiteList) {
       next()
     } else {
       next(`/login?redirect=${to.fullPath}`) // 否则全部重定向到登录页
