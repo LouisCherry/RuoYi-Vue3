@@ -211,7 +211,7 @@
                   'rowguid': avatarRowguid || (avatarRowguid = createUniqueString()),
                   'tag': 'avatar'
                 }"
-                v-model="form.params.avatarurl"
+                v-model="form.params.imagelist"
                 :limit="1"
             />
           </div>

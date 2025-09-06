@@ -115,6 +115,7 @@ const uploadData = computed(() => props.data);
 
 watch(() => props.modelValue, val => {
   if (val) {
+    ;
     // 首先将值转为数组
     const list = Array.isArray(val) ? val : props.modelValue.split(",");
     // 然后将数组转为对象数组
@@ -181,6 +182,7 @@ function handleExceed() {
 // 上传成功回调
 function handleUploadSuccess(res, file) {
   if (res.code === 200) {
+    ;
     uploadList.value.push({ name: res.newFileName, url: res.url,id:res.id });
     uploadedSuccessfully();
   } else {
@@ -206,12 +208,14 @@ async function handleDelete(file) {
       await delAttachinfo(file.id);
     }
 
-  const findex = fileList.value.map(f => f.name).indexOf(file.name);
-  if (findex > -1 && uploadList.value.length === number.value) {
-    fileList.value.splice(findex, 1);
-    emit("update:modelValue", listToString(fileList.value));
-      proxy.$modal.msgSuccess('删除成功');
+    // 关键修复：精确删除当前文件，而非过滤整个列表
+    const index = fileList.value.findIndex(f => f.id === file.id);
+    if (index > -1) {
+      // fileList.value.splice(index, 1); // 仅删除当前项
+      ;
+      emit("update:modelValue", [...fileList.value]); // 同步更新v-model
     }
+    proxy.$modal.msgSuccess('删除成功');
     return true; // 允许删除操作
   } catch (error) {
     proxy.$modal.msgError('删除失败');
@@ -225,7 +229,8 @@ function uploadedSuccessfully() {
     fileList.value = fileList.value.filter(f => f.url !== undefined).concat(uploadList.value);
     uploadList.value = [];
     number.value = 0;
-    emit("update:modelValue", listToString(fileList.value));
+    ;
+    emit("update:modelValue", [...fileList.value]);
     proxy.$modal.closeLoading();
   }
 }
