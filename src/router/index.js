@@ -2,6 +2,8 @@ import { createWebHistory, createRouter } from 'vue-router'
 /* Layout */
 import Layout from '@/layout'
 import HomeView from '../views/HomeView.vue'
+// 导入新创建的公告首页组件
+import HomeNotice from '@/views/HomeNotice'
 
 /**
  * Note: 路由配置项
@@ -58,16 +60,21 @@ export const constantRoutes = [
     component: () => import('@/views/error/401'),
     hidden: true
   },
+  // 首页路由配置（核心修改）
   {
-    path: '',
-    component: Layout,
-    redirect: '/index',
+    path: '/',
+    component: () => import('@/layout'), // 若依的布局组件（包含侧边栏、顶部导航）
+    redirect: '/home-notice', // 默认重定向到公告列表
     children: [
       {
-        path: '/index',
-        component: () => import('@/views/index'),
-        name: 'Index',
-        meta: { title: '首页', icon: 'dashboard', affix: true }
+        path: 'home-notice',
+        name: 'HomeNotice',
+        component: HomeNotice, // 关联公告列表组件
+        meta: {
+          title: '首页', // 侧边栏显示的标题（可改为“公告列表”）
+          icon: 'dashboard', // 侧边栏图标（可保持仪表盘图标，或改为 'bell'）
+          affix: true
+        }
       }
     ]
   },

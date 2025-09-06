@@ -81,6 +81,15 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
+      <!-- 新增：租户名称筛选 -->
+      <el-form-item label="租户名称" prop="tenantname" v-if="isAdmin||isweihu">
+        <el-input
+            v-model="queryParams.tenantname"
+            placeholder="请输入租户名称"
+            clearable
+            @keyup.enter="handleQuery"
+        />
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
         <el-button icon="Refresh" @click="resetQuery">重置</el-button>
@@ -131,6 +140,7 @@
 
     <el-table v-loading="loading" :data="personinfoList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
+      <el-table-column label="租户名称" prop="tenantname" align="center" v-if="isAdmin||isweihu"></el-table-column>
       <el-table-column label="姓名" align="center" prop="fullName" />
       <el-table-column label="职业类型" align="center" prop="occupation" />
       <el-table-column label="薪资范畴" align="center" prop="salaryRange" />
@@ -150,11 +160,25 @@
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['baomu:personinfo:edit']">修改</el-button>
           <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['baomu:personinfo:remove']">删除</el-button>
-          <el-button link type="primary" icon="Link" @click="handleOpenLink(scope.row)" v-if="isAdmin || scope.row.isenable === '1'">打开链接</el-button>
+<!--
+          <el-button link type="primary" icon="Link" @click="handleOpenLink(scope.row)" v-if="isAdmin||isweihu || scope.row.isenable === '1'">打开链接</el-button>
+-->
+          <!-- 核心修改：将“打开链接”改为“复制链接”，保留权限控制 -->
+          <el-tooltip class="item" effect="dark" content="点击复制链接" placement="top">
+            <el-button
+                link
+                type="primary"
+                icon="CopyDocument"
+                @click="handleCopyLink(scope.row)"
+                v-if="isAdmin||isweihu || scope.row.isenable === '1'"
+            >
+              复制链接
+            </el-button>
+          </el-tooltip>
         </template>
       </el-table-column>
       <!-- 在操作列之前添加 -->
-      <el-table-column label="是否启用" align="center" v-if="isAdmin">
+      <el-table-column label="是否启用" align="center" v-if="isAdmin||isweihu">
         <template #default="scope">
           <el-switch
               v-model="scope.row.isenable"
@@ -200,6 +224,16 @@
         </el-form-item>
         <el-form-item label="薪资范畴" prop="salaryRange">
           <el-input v-model="form.salaryRange" placeholder="请输入薪资范畴" />
+        </el-form-item>
+        <el-form-item label="出生年月" prop="birthDate"> <!-- 新增：出生年月录入 -->
+          <el-date-picker
+              v-model="form.birthDate"
+              type="date"
+              value-format="YYYY-MM-DD"
+              placeholder="请选择出生年月"
+              style="width: 100%;"
+              @change="calculateAge"
+          />
         </el-form-item>
         <el-form-item label="年龄" prop="age">
           <el-input v-model="form.age" placeholder="请输入年龄" />
@@ -336,6 +370,57 @@ const isAdmin = computed(() => {
   return userStore.roles.includes('admin')
 })
 
+const isweihu = computed(() => {
+  return userStore.roles.includes('weihu')
+})
+// 复制链接方法
+function handleCopyLink(row) {
+  // 1. 构建要复制的链接（与原打开链接的地址一致）
+  const link = `${window.location.origin}/about?resumeId=${row.id}`;
+
+  try {
+    // 2. 使用Clipboard API复制链接（现代浏览器支持）
+    navigator.clipboard.writeText(link)
+        .then(() => {
+          // 3. 复制成功提示
+          proxy.$modal.msgSuccess("链接复制成功！");
+        })
+        .catch(err => {
+          console.error("复制失败（Clipboard API）:", err);
+          // 4. 降级方案：兼容旧浏览器
+          fallbackCopyLink(link);
+        });
+  } catch (err) {
+    // 5. 浏览器不支持Clipboard API时直接使用降级方案
+    fallbackCopyLink(link);
+  }
+}
+
+// 降级方案：使用文本域复制（兼容所有浏览器）
+function fallbackCopyLink(link) {
+  // 创建隐藏的文本域
+  const textarea = document.createElement("textarea");
+  textarea.value = link;
+  // 隐藏文本域（避免影响界面）
+  textarea.style.position = "fixed";
+  textarea.style.top = "-999px";
+  textarea.style.left = "-999px";
+  document.body.appendChild(textarea);
+
+  // 选中并复制文本
+  textarea.select();
+  const isSuccess = document.execCommand("copy");
+
+  // 清理临时元素
+  document.body.removeChild(textarea);
+
+  // 反馈结果
+  if (isSuccess) {
+    proxy.$modal.msgSuccess("链接复制成功！");
+  } else {
+    proxy.$modal.msgError("复制失败，请手动复制：" + link);
+  }
+}
 
 // 处理启用状态变更
 function handleIsEnableChange(row) {
@@ -394,6 +479,30 @@ const data = reactive({
 });
 
 const { queryParams, form, rules } = toRefs(data);
+
+// 2. 核心功能：根据出生年月计算年龄
+function calculateAge() {
+  if (!form.value.birthDate) {
+    form.value.age = null; // 清空出生年月时，年龄也清空
+    return;
+  }
+
+  // 解析出生年月（YYYY-MM-DD）
+  const birth = new Date(form.value.birthDate);
+  const today = new Date();
+
+  // 计算年龄差
+  let age = today.getFullYear() - birth.getFullYear();
+
+  // 计算月份差：如果今年还没过生日，年龄减1
+  const monthDiff = today.getMonth() - birth.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+
+  // 确保年龄不为负数（避免异常日期导致的问题）
+  form.value.age = age > 0 ? age : 0;
+}
 
 /** 查询保姆个人信息列表 */
 function getList() {

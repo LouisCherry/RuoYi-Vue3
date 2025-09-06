@@ -5,7 +5,25 @@ import createVitePlugins from './vite/plugins';
 // https://vitejs.dev/config/
 export default defineConfig(({ mode, command }) => {
   const env = loadEnv(mode, process.cwd());
-  const { VITE_APP_ENV } = env;
+  const { VITE_APP_ENV, VITE_PROD_API_TARGET } = env;
+
+  // 代理配置：同时支持/dev-api和/prod-api
+  const proxyConfig = {
+    // 开发环境默认代理（/dev-api）
+    '/dev-api': {
+      target: 'http://localhost:8080', // 开发环境后端地址
+      changeOrigin: true,
+      rewrite: (p) => p.replace(/^\/dev-api/, '')
+    },
+    // 新增：生产环境风格代理（/prod-api）
+    '/prod-api': {
+      // 优先使用环境变量配置的生产目标地址，默认 fallback 到开发地址
+      target: VITE_PROD_API_TARGET || 'http://localhost:8080',
+      changeOrigin: true,
+      rewrite: (p) => p.replace(/^\/prod-api/, '')
+    }
+  };
+
   return {
     // 部署生产环境和开发环境下的URL。
     // 默认情况下，vite 会假设你的应用是被部署在一个域名的根路径上
@@ -31,15 +49,7 @@ export default defineConfig(({ mode, command }) => {
       port: 80,
       host: true,
       open: true,
-      proxy: {
-        // https://cn.vitejs.dev/config/#server-proxy
-        '/dev-api': {
-          target: 'http://localhost:8080',
-          changeOrigin: true,
-          rewrite: (p) => p.replace(/^\/dev-api/, '')
-        }
-      },
-      // 开发环境配置
+      proxy: proxyConfig, // 应用代理配置
       middlewareMode: false
     },
     //fix:error:stdin>:7356:1: warning: "@charset" must be the first rule in the file
