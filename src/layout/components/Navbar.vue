@@ -89,7 +89,7 @@ function logout() {
     type: 'warning'
   }).then(() => {
     userStore.logOut().then(() => {
-      location.href = '/home-notice';
+      location.href = '/baomu/home-notice';
     })
   }).catch(() => { });
 }

@@ -376,7 +376,7 @@ const isweihu = computed(() => {
 // 复制链接方法
 function handleCopyLink(row) {
   // 1. 构建要复制的链接（与原打开链接的地址一致）
-  const link = `${window.location.origin}/about?resumeId=${row.id}`;
+  const link = `${window.location.origin}/baomu/about?resumeId=${row.id}`;
 
   try {
     // 2. 使用Clipboard API复制链接（现代浏览器支持）
@@ -592,7 +592,7 @@ function handleUpdate(row) {
 // 打开链接
 function handleOpenLink(row) {
   // 构建新页面地址，使用当前域名拼接路径和参数
-  const url = `${window.location.origin}/about?resumeId=${row.id}`;
+  const url = `${window.location.origin}/baomu/about?resumeId=${row.id}`;
   // 打开新页面
   window.open(url, '_blank');
 }
