@@ -106,9 +106,21 @@
         {{ item.title }}
       </div>
       <div class="em_my_book">
-        <ul class="em_book_list">
+<!--        <ul class="em_book_list">
           <li class="em_book_item" v-for="( it, ind ) in item.photoUrls" :key="ind">
             <ImagePreview :src="it" width="100px" height="100px" />
+          </li>
+        </ul>-->
+        <!-- 调用处代码（只改这里） -->
+        <ul class="em_book_list">
+          <li class="em_book_item" v-for="(it, ind) in item.photoUrls" :key="ind">
+            <!-- 为每个缩略图单独传入完整图片列表，并指定初始索引 -->
+            <ImagePreview
+                :src="item.photoUrls.join(',')"
+                :initial-index="ind"
+                width="100px"
+                height="100px"
+            />
           </li>
         </ul>
       </div>
@@ -207,6 +219,27 @@ export default {
     },
   }
 };
+
+// 只修改realSrc和realSrcList这两个计算属性
+const realSrc = computed(() => {
+  if (!props.src) return '';
+  // 缩略图直接使用传入的当前图片
+  return isExternal(props.src)
+      ? props.src
+      : import.meta.env.VITE_APP_BASE_API + props.src;
+});
+
+const realSrcList = computed(() => {
+  if (!props.src) return [];
+  // 获取自定义属性中的完整列表，如果没有则使用当前图片
+  const allUrls = props['data-all'] || props.src;
+
+  return allUrls.split(',')
+      .map(item => isExternal(item)
+          ? item
+          : import.meta.env.VITE_APP_BASE_API + item
+      );
+});
 </script>
 
 <!-- css部分 -->
