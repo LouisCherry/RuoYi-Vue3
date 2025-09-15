@@ -106,15 +106,10 @@
         {{ item.title }}
       </div>
       <div class="em_my_book">
-<!--        <ul class="em_book_list">
-          <li class="em_book_item" v-for="( it, ind ) in item.photoUrls" :key="ind">
-            <ImagePreview :src="it" width="100px" height="100px" />
-          </li>
-        </ul>-->
-        <!-- 调用处代码（只改这里） -->
+        <!-- 调用处代码（已修改） -->
         <ul class="em_book_list">
           <li class="em_book_item" v-for="(it, ind) in item.photoUrls" :key="ind">
-            <!-- 为每个缩略图单独传入完整图片列表，并指定初始索引 -->
+            <!-- 为每个缩略图传入当前图片作为src，完整列表通过自定义属性传递 -->
             <ImagePreview
                 :src="item.photoUrls.join(',')"
                 :initial-index="ind"
@@ -131,12 +126,6 @@
       <img src="@/assets/img/img_phone.png" alt="">
       电话咨询
     </div>
-    <!-- 放在页面底部，隐藏不显示，仅用于调用预览逻辑 -->
-<!--
-    <ImagePreview ref="imagePreview" style="display: none;" />
--->
-    <!-- 使用别名进行调用 -->
-    <van-image-preview :show="isPreviewVisible" :images="imageList" />
 
   </div>
 </template>
@@ -147,10 +136,7 @@ import {publicresumeinfo} from "@/api/baomu/personinfo";
 import { Toast} from 'vant'
 import { isExternal } from "@/utils/validate"; // 引入外部链接判断工具
 import 'vant/lib/toast/index.css'
-import 'vant/lib/image-preview/index.css'
 import ImagePreview from "@/components/ImagePreview/index.vue";
-// import { ImagePreview as VanImagePreview } from 'vant';
-
 
 export default {
   name: 'aboutName',
@@ -161,23 +147,16 @@ export default {
   data () {
     return {
       certificateList: '',
-      personalInfo: {}, // 初始化为空对象，避免 undefined 报错
+      personalInfo: {},
       portfolio: '',
       selfIntroduction: ''
     }
   },
-  // 计算属性
-  computed: {},
-  // 侦听属性
-  watch: {},
-  // 实例数据创建完成后调用
   created () {
-    // 获取数据
     this.resumeId = this.$route.query.resumeId || '1'
     publicresumeinfo(this.resumeId).then(res => {
       console.log(res)
-      if (res.code=200) {
-        // 正确回调
+      if (res.code === 200) { // 修复比较运算符错误
         this.personalInfo = res.data.personalInfo
         this.selfIntroduction = res.data.selfIntroduction
         this.portfolio = res.data.portfolio
@@ -186,29 +165,12 @@ export default {
         Toast(res.errorMessage)
       }
     })
-    // fetchData('baomu/personinfo/publicresumeinfo', { resumeId: this.resumeId }).then(res => {
-    //   console.log(res)
-    //   if (res.success) {
-    //     // 正确回调
-    //     this.personalInfo = res.data.personalInfo
-    //     this.selfIntroduction = res.data.selfIntroduction
-    //     this.portfolio = res.data.portfolio
-    //     this.certificateList = res.data.certificateList
-    //   } else {
-    //     Toast(res.errorMessage)
-    //   }
-    // })
   },
-  // 实例DOM被挂载后调用
-  mounted () { },
   methods: {
     // 将 getRealPhotoUrl 定义在 methods 中，确保能访问到 import 的变量
     getRealPhotoUrl(url) {
       if (!url) return "";
-      // 若为外部链接（如 http:// 开头），直接返回
-      if (isExternal(url)) return url;
-      // 否则拼接基础 API 地址
-      return import.meta.env.VITE_APP_BASE_API + url;
+      return isExternal(url) ? url : import.meta.env.VITE_APP_BASE_API + url;
     },
     openCall (phone) {
       if (phone) {
@@ -219,27 +181,6 @@ export default {
     },
   }
 };
-
-// 只修改realSrc和realSrcList这两个计算属性
-const realSrc = computed(() => {
-  if (!props.src) return '';
-  // 缩略图直接使用传入的当前图片
-  return isExternal(props.src)
-      ? props.src
-      : import.meta.env.VITE_APP_BASE_API + props.src;
-});
-
-const realSrcList = computed(() => {
-  if (!props.src) return [];
-  // 获取自定义属性中的完整列表，如果没有则使用当前图片
-  const allUrls = props['data-all'] || props.src;
-
-  return allUrls.split(',')
-      .map(item => isExternal(item)
-          ? item
-          : import.meta.env.VITE_APP_BASE_API + item
-      );
-});
 </script>
 
 <!-- css部分 -->

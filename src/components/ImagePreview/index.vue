@@ -32,6 +32,10 @@ const props = defineProps({
   height: {
     type: [Number, String],
     default: ""
+  },
+  initialIndex: {  // 新增初始索引属性
+    type: Number,
+    default: 0
   }
 });
 
@@ -152,7 +156,9 @@ const handleClick = () => {
 // 计算属性保持不变
 const realSrc = computed(() => {
   if (!props.src) return '';
-  let real_src = props.src.split(",")[0];
+  const srcList = props.src.split(",");
+  // 根据初始索引获取对应的图片
+  const real_src = srcList[props.initialIndex] || srcList[0];
   return isExternal(real_src)
       ? real_src
       : import.meta.env.VITE_APP_BASE_API + real_src;
