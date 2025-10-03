@@ -162,8 +162,21 @@
           <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['baomu:personinfo:remove']">删除</el-button>
 <!--
           <el-button link type="primary" icon="Link" @click="handleOpenLink(scope.row)" v-if="isAdmin||isweihu || scope.row.isenable === '1'">打开链接</el-button>
+
 -->
-          <!-- 核心修改：将“打开链接”改为“复制链接”，保留权限控制 -->
+          <!-- 普通短链接-->
+          <el-tooltip class="item" effect="dark" content="点击复制链接" placement="top">
+            <el-button
+                link
+                type="primary"
+                icon="CopyDocument"
+                @click="handleShortLink(scope.row)"
+                v-if="isjiazhen||isweihu || scope.row.isenable === '1'"
+            >
+              复制链接
+            </el-button>
+          </el-tooltip>
+          <!-- 复制长链接 -->
           <el-tooltip class="item" effect="dark" content="点击复制链接" placement="top">
             <el-button
                 link
@@ -172,7 +185,7 @@
                 @click="handleCopyLink(scope.row)"
                 v-if="isAdmin||isweihu || scope.row.isenable === '1'"
             >
-              复制链接
+              复制长链接
             </el-button>
           </el-tooltip>
         </template>
@@ -373,6 +386,11 @@ const isAdmin = computed(() => {
 const isweihu = computed(() => {
   return userStore.roles.includes('weihu')
 })
+
+//家政
+const isjiazhen = computed(() => {
+  return userStore.roles.includes('baomu')
+})
 // 复制链接方法
 function handleCopyLink(row) {
   // 1. 构建要复制的链接（与原打开链接的地址一致）
@@ -393,6 +411,69 @@ function handleCopyLink(row) {
   } catch (err) {
     // 5. 浏览器不支持Clipboard API时直接使用降级方案
     fallbackCopyLink(link);
+  }
+}
+
+
+// 复制短链接
+function handleShortLink(row) {
+  //生成短链接id
+  //看是否上次更新时间至今是否高于7天
+  let ifupdateshordate = false;
+  let link; // 先声明链接变量
+
+  if (row.shortdate) {
+    // 将shortdate转换为Date对象（假设row.shortdate是YYYY-MM-DD格式字符串或时间戳）
+    const lastDate = new Date(row.shortdate);
+    // 获取当前时间
+    const now = new Date();
+    // 计算时间差（毫秒）
+    const timeDiff = now - lastDate;
+    // 转换为天数（1天 = 24*60*60*1000毫秒）
+    const dayDiff = timeDiff / (1000 * 60 * 60 * 24);
+    // 判断是否超过7天
+    if (dayDiff > 7) {
+      // 高于7天的逻辑处理
+      console.log('上次更新时间已超过7天');
+      // 例如：标记为过期、提示更新等
+      ifupdateshordate = true;
+      row.shortdate = new Date();
+      row.shortid = createUniqueString();
+    }
+  }else{
+    row.shortdate = new Date();
+    row.shortid = createUniqueString();
+    ifupdateshordate = true;
+  }
+
+  // 先构建要复制的链接
+  link = `${window.location.origin}/baomu/about?shortid=${row.shortid}`;
+
+  // 先执行复制操作（确保在用户交互上下文内）
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(link);
+      proxy.$modal.msgSuccess("链接复制成功！");
+    } catch (err) {
+      console.error("复制失败（Clipboard API）:", err);
+      fallbackCopyLink(link);
+    }
+  };
+
+  // 立即执行复制
+  copyLink();
+
+  // 再处理更新请求（异步操作不影响复制）
+  if(ifupdateshordate){
+    updatePersoninfoSingle({
+      id: row.id,
+      shortdate: row.shortdate,
+      shortid: row.shortid
+    }).then(response => {
+      proxy.$modal.msgSuccess("状态更新成功");
+      getList(); // 刷新列表
+    }).catch(() => {
+    });
   }
 }
 

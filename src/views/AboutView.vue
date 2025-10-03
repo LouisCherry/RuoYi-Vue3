@@ -1,8 +1,8 @@
 <!-- html部分 -->
 <template>
-  <!-- 当 isenable 为 0 时显示服务到期提示 -->
-  <div v-if="personalInfo.isenable !== undefined && (!personalInfo.isenable || personalInfo.isenable === '0')" class="expired-container">
-    <div class="expired-message">您的服务到期</div>
+  <!-- 合并服务到期和链接失效的判断逻辑，统一显示提示 -->
+  <div v-if="showExpiredMessage" class="expired-container">
+    <div class="expired-message">{{ expiredMessage }}</div>
   </div>
   <div v-else class="container">
     <!-- 顶部用户展示 -->
@@ -132,11 +132,12 @@
 
 <!-- js部分 -->
 <script>
-import {publicresumeinfo} from "@/api/baomu/personinfo";
+import {publicresumeinfo, publicresumeinfobyshortid} from "@/api/baomu/personinfo";
 import { Toast} from 'vant'
 import { isExternal } from "@/utils/validate"; // 引入外部链接判断工具
 import 'vant/lib/toast/index.css'
 import ImagePreview from "@/components/ImagePreview/index.vue";
+import {createUniqueString} from "@/utils/index.js";
 
 export default {
   name: 'aboutName',
@@ -149,22 +150,74 @@ export default {
       certificateList: '',
       personalInfo: {},
       portfolio: '',
-      selfIntroduction: ''
+      selfIntroduction: '',
+      // 新增状态变量
+      showExpiredMessage: false,
+      expiredMessage: ''
     }
   },
   created () {
-    this.resumeId = this.$route.query.resumeId || '1'
-    publicresumeinfo(this.resumeId).then(res => {
-      console.log(res)
-      if (res.code === 200) { // 修复比较运算符错误
-        this.personalInfo = res.data.personalInfo
-        this.selfIntroduction = res.data.selfIntroduction
-        this.portfolio = res.data.portfolio
-        this.certificateList = res.data.certificateList
-      } else {
-        Toast(res.errorMessage)
-      }
-    })
+    this.resumeId = this.$route.query.resumeId || '1';
+    this.shortid = this.$route.query.shortid;
+    if(this.shortid){
+      publicresumeinfobyshortid(this.shortid).then(res => {
+        console.log(res)
+        if (res.code === 200) {
+          // 检查服务到期状态（isenable为0或false）
+          const isServiceExpired = res.data.personalInfo.isenable !== undefined &&
+                                 (res.data.personalInfo.isenable === '0' || !res.data.personalInfo.isenable);
+
+          // 检查链接是否失效（超过7天）
+          let isLinkExpired = false;
+          if(res.data.personalInfo.shortdate){
+            const lastDate = new Date(res.data.personalInfo.shortdate);
+            const now = new Date();
+            const timeDiff = now - lastDate;
+            const dayDiff = timeDiff / (1000 * 60 * 60 * 24);
+            isLinkExpired = dayDiff > 7;
+          }
+
+          // 优先级：服务到期 > 链接失效
+          if (isServiceExpired) {
+            this.showExpiredMessage = true;
+            this.expiredMessage = "您的服务到期";
+          } else if (isLinkExpired) {
+            this.showExpiredMessage = true;
+            this.expiredMessage = "链接已失效";
+            }else{
+            // 正常显示数据
+              this.personalInfo = res.data.personalInfo;
+            this.selfIntroduction = res.data.selfIntroduction;
+            this.portfolio = res.data.portfolio;
+            this.certificateList = res.data.certificateList;
+            }
+        } else {
+          Toast(res.errorMessage);
+        }
+      })
+    }else{
+      publicresumeinfo(this.resumeId).then(res => {
+        console.log(res)
+        if (res.code === 200) {
+          // 检查服务到期状态
+          const isServiceExpired = res.data.personalInfo.isenable !== undefined &&
+                                 (res.data.personalInfo.isenable === '0' || !res.data.personalInfo.isenable);
+
+          if (isServiceExpired) {
+            this.showExpiredMessage = true;
+            this.expiredMessage = "您的服务到期";
+        } else {
+            // 正常显示数据
+            this.personalInfo = res.data.personalInfo;
+            this.selfIntroduction = res.data.selfIntroduction;
+            this.portfolio = res.data.portfolio;
+            this.certificateList = res.data.certificateList;
+          }
+        } else {
+          Toast(res.errorMessage);
+        }
+      })
+    }
   },
   methods: {
     // 将 getRealPhotoUrl 定义在 methods 中，确保能访问到 import 的变量
@@ -174,17 +227,28 @@ export default {
     },
     openCall (phone) {
       if (phone) {
-        window.location.href = 'tel:' + phone
+        window.location.href = 'tel:' + phone;
       } else {
-        Toast('暂无联系方式')
+        Toast('暂无联系方式');
       }
     },
+
   }
 };
+
 </script>
 
 <!-- css部分 -->
 <style lang="scss" scoped>
 @import '@/assets/css/common.css';
 @import './css/about.scss';
+
+// 统一过期提示样式
+.expired-container {
+  color: #f56c6c;
+  font-size: 18px;
+  text-align: center;
+  padding: 50px 0;
+  min-height: 300px; // 确保有足够高度显示提示
+}
 </style>

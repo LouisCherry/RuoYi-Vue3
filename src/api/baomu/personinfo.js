@@ -52,10 +52,18 @@ export function delPersoninfo(id) {
   })
 }
 
-// 删除保姆个人信息
+// 通过id,获取保姆个人信息
 export function publicresumeinfo(id) {
   return request({
     url: '/baomu/personinfo/publicresumeinfo/' + id,
+    method: 'get'
+  })
+}
+
+// 通过shortid,获取保姆个人信息
+export function publicresumeinfobyshortid(id) {
+  return request({
+    url: '/baomu/personinfo/publicresumeinfobyshortid/' + id,
     method: 'get'
   })
 }
