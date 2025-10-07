@@ -1,219 +1,272 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="姓名" prop="fullName">
-        <el-input
-          v-model="queryParams.fullName"
-          placeholder="请输入姓名"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="职业类型" prop="occupation">
-        <el-input
-          v-model="queryParams.occupation"
-          placeholder="请输入职业类型"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="薪资范畴" prop="salaryRange">
-        <el-input
-          v-model="queryParams.salaryRange"
-          placeholder="请输入薪资范畴"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="年龄" prop="age">
-        <el-input
-          v-model="queryParams.age"
-          placeholder="请输入年龄"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="生肖" prop="zodiac">
-        <el-input
-          v-model="queryParams.zodiac"
-          placeholder="请输入生肖"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="所在省份" prop="province">
-        <el-input
-          v-model="queryParams.province"
-          placeholder="请输入所在省份"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="民族" prop="ethnicGroup">
-        <el-input
-          v-model="queryParams.ethnicGroup"
-          placeholder="请输入民族"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="星座" prop="constellation">
-        <el-input
-          v-model="queryParams.constellation"
-          placeholder="请输入星座"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="学历" prop="education">
-        <el-input
-          v-model="queryParams.education"
-          placeholder="请输入学历"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="联系电话" prop="phone">
-        <el-input
-          v-model="queryParams.phone"
-          placeholder="请输入联系电话"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <!-- 新增：租户名称筛选 -->
-      <el-form-item label="租户名称" prop="tenantname" v-if="isAdmin||isweihu">
-        <el-input
-            v-model="queryParams.tenantname"
-            placeholder="请输入租户名称"
-            clearable
-            @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
-        <el-button icon="Refresh" @click="resetQuery">重置</el-button>
-      </el-form-item>
-    </el-form>
+    <el-row :gutter="20">
+      <el-col :span="4" :xs="24" v-if="showLeftTree">
+        <div class="head-container">
+          <el-input
+              v-model="tenantname"
+              placeholder="请输入租户名称"
+              clearable
+              prefix-icon="Search"
+              style="margin-bottom: 20px"
+          />
+        </div>
+        <div class="head-container">
+          <el-tree
+              :data="tenantOptions"
+              :props="{ label: 'label', children: 'children' }"
+              :expand-on-click-node="false"
+              :filter-node-method="filterNode"
+              ref="tenantTreeRef"
+              node-key="id"
+              highlight-current
+              default-expand-all
+              @node-click="handleNodeClick"
+          />
+        </div>
+      </el-col>
+      <el-col :span="showLeftTree ? 20 : 24" :xs="24">
+        <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
+          <el-form-item label="姓名" prop="fullName">
+            <el-input
+                v-model="queryParams.fullName"
+                placeholder="请输入姓名"
+                clearable
+                @keyup.enter="handleQuery"
+            />
+          </el-form-item>
+          <el-form-item label="职业类型" prop="occupation">
+            <el-input
+                v-model="queryParams.occupation"
+                placeholder="请输入职业类型"
+                clearable
+                @keyup.enter="handleQuery"
+            />
+          </el-form-item>
+          <el-form-item label="薪资范畴" prop="salaryRange">
+            <el-input
+                v-model="queryParams.salaryRange"
+                placeholder="请输入薪资范畴"
+                clearable
+                @keyup.enter="handleQuery"
+            />
+          </el-form-item>
+          <el-form-item label="年龄" prop="age">
+            <el-input
+                v-model="queryParams.age"
+                placeholder="请输入年龄"
+                clearable
+                @keyup.enter="handleQuery"
+            />
+          </el-form-item>
+          <el-form-item label="生肖" prop="zodiac">
+            <el-input
+                v-model="queryParams.zodiac"
+                placeholder="请输入生肖"
+                clearable
+                @keyup.enter="handleQuery"
+            />
+          </el-form-item>
+          <el-form-item label="所在省份" prop="province">
+            <el-input
+                v-model="queryParams.province"
+                placeholder="请输入所在省份"
+                clearable
+                @keyup.enter="handleQuery"
+            />
+          </el-form-item>
+          <el-form-item label="民族" prop="ethnicGroup">
+            <el-input
+                v-model="queryParams.ethnicGroup"
+                placeholder="请输入民族"
+                clearable
+                @keyup.enter="handleQuery"
+            />
+          </el-form-item>
+          <el-form-item label="星座" prop="constellation">
+            <el-input
+                v-model="queryParams.constellation"
+                placeholder="请输入星座"
+                clearable
+                @keyup.enter="handleQuery"
+            />
+          </el-form-item>
+          <el-form-item label="学历" prop="education">
+            <el-input
+                v-model="queryParams.education"
+                placeholder="请输入学历"
+                clearable
+                @keyup.enter="handleQuery"
+            />
+          </el-form-item>
+          <el-form-item label="联系电话" prop="phone">
+            <el-input
+                v-model="queryParams.phone"
+                placeholder="请输入联系电话"
+                clearable
+                @keyup.enter="handleQuery"
+            />
+          </el-form-item>
+          <!-- 新增：租户名称筛选 -->
+          <el-form-item label="租户名称" prop="tenantname" v-if="isAdmin||isweihu||ishehuoren">
+            <el-input
+                v-model="queryParams.tenantname"
+                placeholder="请输入租户名称"
+                clearable
+                @keyup.enter="handleQuery"
+            />
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
+            <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+          </el-form-item>
+        </el-form>
 
-    <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="Plus"
-          @click="handleAdd"
-          v-hasPermi="['baomu:personinfo:add']"
-        >新增</el-button>
+        <el-row :gutter="10" class="mb8">
+          <el-col :span="1.5">
+            <el-button
+                type="primary"
+                plain
+                icon="Plus"
+                @click="handleAdd"
+                v-hasPermi="['baomu:personinfo:add']"
+            >新增</el-button>
+          </el-col>
+          <el-col :span="1.5">
+            <el-button
+                type="success"
+                plain
+                icon="Edit"
+                :disabled="single"
+                @click="handleUpdate"
+                v-hasPermi="['baomu:personinfo:edit']"
+            >修改</el-button>
+          </el-col>
+          <el-col :span="1.5">
+            <el-button
+                type="danger"
+                plain
+                icon="Delete"
+                :disabled="multiple"
+                @click="handleDelete"
+                v-hasPermi="['baomu:personinfo:remove']"
+            >删除</el-button>
+          </el-col>
+          <el-col :span="1.5">
+            <el-button
+                type="warning"
+                plain
+                icon="Download"
+                @click="handleExport"
+                v-hasPermi="['baomu:personinfo:export']"
+            >导出</el-button>
+          </el-col>
+          <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
+        </el-row>
+
+        <el-table v-loading="loading" :data="personinfoList" @selection-change="handleSelectionChange">
+          <el-table-column type="selection" width="55" align="center" />
+          <el-table-column label="租户名称" prop="tenantname" align="center" v-if="isAdmin||isweihu||ishehuoren"></el-table-column>
+          <el-table-column label="姓名" align="center" prop="fullName" />
+          <el-table-column label="职业类型" align="center" prop="occupation" />
+          <el-table-column label="薪资范畴" align="center" prop="salaryRange" />
+          <el-table-column label="年龄" align="center" prop="age" />
+          <el-table-column label="生肖" align="center" prop="zodiac" />
+          <el-table-column label="所在省份" align="center" prop="province" />
+          <el-table-column label="民族" align="center" prop="ethnicGroup" />
+          <el-table-column label="星座" align="center" prop="constellation" />
+          <el-table-column label="学历" align="center" prop="education" />
+          <el-table-column label="联系电话" align="center" prop="phone" />
+          <el-table-column label="工作经验" align="center" prop="workExperience" />
+          <el-table-column label="技能与优势" align="center" prop="skillsAndStrengths" />
+          <!--
+                <el-table-column label="自我介绍" align="center" prop="selfIntroduction" />
+          -->
+          <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+            <template #default="scope">
+              <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['baomu:personinfo:edit']">修改</el-button>
+              <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['baomu:personinfo:remove']">删除</el-button>
+              <!--
+                        <el-button link type="primary" icon="Link" @click="handleOpenLink(scope.row)" v-if="isAdmin||isweihu || scope.row.isenable === '1'">打开链接</el-button>
+
+              -->
+              <!-- 普通短链接-->
+              <el-tooltip class="item" effect="dark" content="点击复制链接" placement="top">
+                <el-button
+                    link
+                    type="primary"
+                    icon="CopyDocument"
+                    @click="handleShortLink(scope.row)"
+                    v-if="isjiazhen||isweihu || ishehuoren || scope.row.isenable === '1'"
+                >
+                  复制短链接
+                </el-button>
+              </el-tooltip>
+              <!-- 复制长链接 -->
+              <el-tooltip class="item" effect="dark" content="点击复制链接" placement="top">
+                <el-button
+                    link
+                    type="primary"
+                    icon="CopyDocument"
+                    @click="handleCopyLink(scope.row)"
+                    v-if="isjiazhen || isAdmin||isweihu || ishehuoren || scope.row.isenable === '1'"
+                >
+                  复制链接
+                </el-button>
+              </el-tooltip>
+            </template>
+          </el-table-column>
+          <!-- 在操作列之前添加 -->
+          <el-table-column label="是否启用" align="center" v-if="isAdmin||isweihu">
+            <template #default="scope">
+              <el-switch
+                  v-model="scope.row.isenable"
+                  active-value="1"
+                  inactive-value="0"
+                  @change="handleIsEnableChange(scope.row)"
+              ></el-switch>
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <pagination
+            v-show="total>0"
+            :total="total"
+            v-model:page="queryParams.pageNum"
+            v-model:limit="queryParams.pageSize"
+            @pagination="getList"
+        />
       </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="Edit"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['baomu:personinfo:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="Delete"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['baomu:personinfo:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="Download"
-          @click="handleExport"
-          v-hasPermi="['baomu:personinfo:export']"
-        >导出</el-button>
-      </el-col>
-      <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="personinfoList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="租户名称" prop="tenantname" align="center" v-if="isAdmin||isweihu"></el-table-column>
-      <el-table-column label="姓名" align="center" prop="fullName" />
-      <el-table-column label="职业类型" align="center" prop="occupation" />
-      <el-table-column label="薪资范畴" align="center" prop="salaryRange" />
-      <el-table-column label="年龄" align="center" prop="age" />
-      <el-table-column label="生肖" align="center" prop="zodiac" />
-      <el-table-column label="所在省份" align="center" prop="province" />
-      <el-table-column label="民族" align="center" prop="ethnicGroup" />
-      <el-table-column label="星座" align="center" prop="constellation" />
-      <el-table-column label="学历" align="center" prop="education" />
-      <el-table-column label="联系电话" align="center" prop="phone" />
-      <el-table-column label="工作经验" align="center" prop="workExperience" />
-      <el-table-column label="技能与优势" align="center" prop="skillsAndStrengths" />
-<!--
-      <el-table-column label="自我介绍" align="center" prop="selfIntroduction" />
--->
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-        <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['baomu:personinfo:edit']">修改</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['baomu:personinfo:remove']">删除</el-button>
-<!--
-          <el-button link type="primary" icon="Link" @click="handleOpenLink(scope.row)" v-if="isAdmin||isweihu || scope.row.isenable === '1'">打开链接</el-button>
-
--->
-          <!-- 普通短链接-->
-          <el-tooltip class="item" effect="dark" content="点击复制链接" placement="top">
-            <el-button
-                link
-                type="primary"
-                icon="CopyDocument"
-                @click="handleShortLink(scope.row)"
-                v-if="isjiazhen||isweihu || scope.row.isenable === '1'"
-            >
-              复制链接
-            </el-button>
-          </el-tooltip>
-          <!-- 复制长链接 -->
-          <el-tooltip class="item" effect="dark" content="点击复制链接" placement="top">
-            <el-button
-                link
-                type="primary"
-                icon="CopyDocument"
-                @click="handleCopyLink(scope.row)"
-                v-if="isAdmin||isweihu || scope.row.isenable === '1'"
-            >
-              复制长链接
-            </el-button>
-          </el-tooltip>
-        </template>
-      </el-table-column>
-      <!-- 在操作列之前添加 -->
-      <el-table-column label="是否启用" align="center" v-if="isAdmin||isweihu">
-        <template #default="scope">
-          <el-switch
-              v-model="scope.row.isenable"
-              active-value="1"
-              inactive-value="0"
-              @change="handleIsEnableChange(scope.row)"
-          ></el-switch>
-        </template>
-      </el-table-column>
-    </el-table>
-    
-    <pagination
-      v-show="total>0"
-      :total="total"
-      v-model:page="queryParams.pageNum"
-      v-model:limit="queryParams.pageSize"
-      @pagination="getList"
-    />
 
     <!-- 添加或修改保姆个人信息对话框 -->
     <el-dialog :title="title" v-model="open" width="700px" append-to-body>
       <el-form ref="personinfoRef" :model="form" :rules="rules" label-width="80px">
+        <el-form-item label="租户" prop="tenantid" v-if="showLeftTree">
+          <el-row :gutter="10">
+            <el-col :span="16">
+              <el-input
+                  v-model="form.tenantname"
+                  placeholder="请选择租户"
+                  readonly
+                  style="cursor: pointer"
+              />
+              <!-- 存储实际提交的用户ID（隐藏） -->
+              <el-input
+                  v-model="form.tenantid"
+                  type="hidden"
+              />
+            </el-col>
+            <el-col :span="8">
+              <el-button
+                  type="primary"
+                  icon="User"
+                  @click="openSelectTetantDialog"
+              >选择租户</el-button>
+            </el-col>
+          </el-row>
+        </el-form-item>
         <!-- 头像上传区域 -->
         <el-form-item label="头像" prop="avatar">
           <div class="avatar-upload-container">
@@ -276,7 +329,7 @@
           <el-input v-model="form.skillsAndStrengths" type="textarea" placeholder="请输入内容" />
         </el-form-item>
         <el-form-item label="自我介绍" prop="selfIntroduction">
-          <el-input v-model="form.selfIntroduction" type="textarea" placeholder="请输入内容" />
+          <el-input v-model="form.selfIntroduction" type="textarea" placeholder="请输入内容" height="400px"/>
         </el-form-item>
 
         <!-- 证书信息区域 -->
@@ -340,6 +393,117 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 系统用户选择弹窗（复用角色授权的用户选择组件逻辑） -->
+    <el-dialog
+        title="选择租户"
+        v-model="selectTetantVisible"
+        width="800px"
+        top="5vh"
+        append-to-body
+    >
+      <!-- 搜索区域 -->
+<!--      <el-form :model="userQueryParams" ref="hehuorenuserQueryRef" :inline="true">
+        <el-form-item label="用户名称" prop="userName">
+          <el-input
+              v-model="userQueryParams.userName"
+              placeholder="请输入用户名称"
+              clearable
+              style="width: 180px"
+              @keyup.enter="getHehuorengUserList"
+          />
+        </el-form-item>
+        <el-form-item label="手机号码" prop="phonenumber">
+          <el-input
+              v-model="userQueryParams.phonenumber"
+              placeholder="请输入手机号码"
+              clearable
+              style="width: 180px"
+              @keyup.enter="getHehuorengUserList"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" icon="Search" @click="getHehuorengUserList">搜索</el-button>
+          <el-button icon="Refresh" @click="resetHehuoUserQuery">重置</el-button>
+        </el-form-item>
+      </el-form>-->
+
+      <el-form :model="userQueryParams" ref="queryTenantRef" :inline="true" label-width="68px">
+        <el-form-item label="用户名称" prop="userName">
+          <el-input
+              v-model="userQueryParams.userName"
+              placeholder="请输入用户名称"
+              clearable
+              @keyup.enter="handleQuery"
+          />
+        </el-form-item>
+        <el-form-item label="截止时间" prop="tenantEndTime">
+          <el-date-picker clearable
+                          v-model="userQueryParams.tenantEndTime"
+                          type="date"
+                          value-format="YYYY-MM-DD"
+                          placeholder="请选择截止时间">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" icon="Search" @click="handleTenantQuery">搜索</el-button>
+          <el-button icon="Refresh" @click="resetTenantQuery">重置</el-button>
+        </el-form-item>
+      </el-form>
+
+      <!-- 用户列表 -->
+<!--      <el-table
+          @row-click="clickUserRow"
+          ref="userTableRef"
+          :data="hehuorenguserList"
+          @selection-change="handleUserSelectionChange"
+          height="300px"
+      >
+        <el-table-column type="selection" width="55"></el-table-column>
+        <el-table-column label="用户名称" prop="userName" :show-overflow-tooltip="true" />
+        <el-table-column label="用户昵称" prop="nickName" :show-overflow-tooltip="true" />
+        <el-table-column label="手机" prop="phonenumber" :show-overflow-tooltip="true" />
+        <el-table-column label="状态" align="center" prop="status">
+          <template #default="scope">
+            <dict-tag :options="sys_normal_disable" :value="scope.row.status" />
+          </template>
+        </el-table-column>
+      </el-table>-->
+
+      <el-table v-loading="loading" :data="tenantList" @selection-change="handleUserSelectionChange">
+        <el-table-column type="selection" width="55" align="center" />
+        <!--      <el-table-column label="编号" align="center" prop="id" />-->
+        <el-table-column label="用户" align="center" prop="userName" />
+        <el-table-column label="租户截止时间" align="center" prop="tenantEndTime" width="180">
+          <template #default="scope">
+            <span>{{ parseTime(scope.row.tenantEndTime, '{y}-{m}-{d}') }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="更新者" align="center" prop="updateBy" />
+        <el-table-column label="更新时间" align="center" prop="updateTime" width="180">
+          <template #default="scope">
+            <span>{{ parseTime(scope.row.updateTime, '{y}-{m}-{d}') }}</span>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <!-- 分页 -->
+      <pagination
+          v-show="userTotal > 0"
+          :total="userTotal"
+          v-model:page="userQueryParams.pageNum"
+          v-model:limit="userQueryParams.pageSize"
+          @pagination="getTenantList"
+      />
+
+      <!-- 弹窗按钮 -->
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button type="primary" @click="confirmSelectTenant">确 定</el-button>
+          <el-button @click="selectTetantVisible = false">取 消</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -352,6 +516,7 @@ import {
   updatePersoninfo,
   updatePersoninfoSingle
 } from "@/api/baomu/personinfo";
+import {tenantTree, listTenant, listnopermi} from "@/api/baomu/tenant"
 import { ref } from 'vue';
 import { createUniqueString } from '@/utils/index'
 import useUserStore from '@/store/modules/user'
@@ -374,6 +539,70 @@ const single = ref(true);
 const multiple = ref(true);
 const total = ref(0);
 const title = ref("");
+const tenantOptions = ref(undefined);
+const tenantname = ref("");
+const selectTetantVisible = ref(false); // 弹窗显示状态
+const tenantList = ref([]); // 租户列表
+const userTotal = ref(0); // 用户总数
+const hehuorenguserTotal = ref(0); // 用户总数
+const selectedUser = ref(null); // 选中的用户
+
+// 用户查询参数
+const userQueryParams = reactive({
+  pageNum: 1,
+  pageSize: 10,
+  userName: undefined,
+  phonenumber: undefined
+});
+
+// 打开租户选择弹窗
+function openSelectTetantDialog() {
+  selectTetantVisible.value = true;
+  getTenantList(); // 加载租户列表
+}
+
+/** 查询当前用户可以管辖的租户 */
+function getTenantList() {
+  loading.value = true
+  listnopermi(userQueryParams.value).then(response => {
+    tenantList.value = response.rows
+    userTotal.value = response.total
+    loading.value = false
+  })
+};
+
+
+/** 查询当前用户可以管辖的租户 */
+function getTenantTree() {
+  tenantTree().then(response => {
+
+    tenantOptions.value = response.data;
+  });
+};
+
+// 判断是否显示左侧树
+const showLeftTree = computed(() => {
+  return isAdmin.value || isweihu.value || ishehuoren.value;
+});
+
+/** 通过条件过滤节点  */
+const filterNode = (value, data) => {
+  if (!value) return true;
+  return data.label.indexOf(value) !== -1;
+};
+
+/** 根据名称筛选部门树 */
+watch(tenantname, val => {
+  proxy.$refs["tenantTreeRef"].filter(val);
+});
+
+/** 节点单击事件 */
+function handleNodeClick(data) {
+  queryParams.value.tenantid = data.id;
+  handleQuery();
+};
+
+getTenantTree();
 
 // 存储头像上传时的rowguid
 const avatarRowguid = ref('');
@@ -390,6 +619,11 @@ const isweihu = computed(() => {
 //家政
 const isjiazhen = computed(() => {
   return userStore.roles.includes('baomu')
+})
+
+//合伙人
+const ishehuoren = computed(() => {
+  return userStore.roles.includes('hehuoren')
 })
 // 复制链接方法
 function handleCopyLink(row) {
@@ -412,6 +646,27 @@ function handleCopyLink(row) {
     // 5. 浏览器不支持Clipboard API时直接使用降级方案
     fallbackCopyLink(link);
   }
+}
+
+// 处理用户选择
+function handleUserSelectionChange(selection) {
+  if (selection.length > 0) {
+    selectedUser.value = selection[0]; // 仅支持单选
+  } else {
+    selectedUser.value = null;
+  }
+}
+
+// 确认选择租户
+function confirmSelectTenant() {
+  if (!selectedUser.value) {
+    proxy.$modal.msgError("请选择用户");
+    return;
+  }
+  // 赋值给表单
+  form.value.tenantid = selectedUser.value.userId;
+  form.value.tenantname = selectedUser.value.userName;
+  selectTetantVisible.value = false;
 }
 
 
@@ -639,6 +894,19 @@ function resetQuery() {
   proxy.resetForm("queryRef");
   handleQuery();
 }
+
+/** 搜索按钮操作 */
+function handleTenantQuery() {
+  queryParams.value.pageNum = 1;
+  getTenantList();
+}
+
+/** 重置按钮操作 */
+function resetTenantQuery() {
+  proxy.resetForm("queryTenantRef");
+  handleTenantQuery();
+}
+
 
 // 多选框选中数据
 function handleSelectionChange(selection) {

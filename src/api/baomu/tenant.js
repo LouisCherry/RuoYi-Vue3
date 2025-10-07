@@ -9,6 +9,23 @@ export function listTenant(query) {
   })
 }
 
+export function listnopermi(query){
+  return request({
+    url: '/baomu/tenant/listnopermi',
+    method: 'get',
+    params: query
+  })
+}
+
+// 查询租户清单列表
+export function tenantTree(query) {
+  return request({
+    url: '/baomu/tenant/tenantTree',
+    method: 'get',
+    params: query
+  })
+}
+
 // 查询租户清单详细
 export function getTenant(id) {
   return request({

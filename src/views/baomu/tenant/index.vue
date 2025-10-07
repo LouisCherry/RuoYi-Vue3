@@ -124,6 +124,30 @@
             </el-col>
           </el-row>
         </el-form-item>
+        <el-form-item label="合伙人" prop="hehuouserId">
+          <el-row :gutter="10">
+            <el-col :span="16">
+              <el-input
+                  v-model="form.hehuorenguserName"
+                  placeholder="请选择系统用户"
+                  readonly
+                  style="cursor: pointer"
+              />
+              <!-- 存储实际提交的用户ID（隐藏） -->
+              <el-input
+                  v-model="form.hehuouserId"
+                  type="hidden"
+              />
+            </el-col>
+            <el-col :span="8">
+              <el-button
+                  type="primary"
+                  icon="User"
+                  @click="openSelectHehuorengUserDialog"
+              >选择用户</el-button>
+            </el-col>
+          </el-row>
+        </el-form-item>
         <el-form-item label="截止时间" prop="tenantEndTime">
           <el-date-picker clearable
             v-model="form.tenantEndTime"
@@ -216,6 +240,77 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 系统用户选择弹窗（复用角色授权的用户选择组件逻辑） -->
+    <el-dialog
+        title="选择系统用户"
+        v-model="selectHehuorenUserVisible"
+        width="800px"
+        top="5vh"
+        append-to-body
+    >
+      <!-- 搜索区域 -->
+      <el-form :model="userQueryParams" ref="hehuorenuserQueryRef" :inline="true">
+        <el-form-item label="用户名称" prop="userName">
+          <el-input
+              v-model="userQueryParams.userName"
+              placeholder="请输入用户名称"
+              clearable
+              style="width: 180px"
+              @keyup.enter="getHehuorengUserList"
+          />
+        </el-form-item>
+        <el-form-item label="手机号码" prop="phonenumber">
+          <el-input
+              v-model="userQueryParams.phonenumber"
+              placeholder="请输入手机号码"
+              clearable
+              style="width: 180px"
+              @keyup.enter="getHehuorengUserList"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" icon="Search" @click="getHehuorengUserList">搜索</el-button>
+          <el-button icon="Refresh" @click="resetHehuoUserQuery">重置</el-button>
+        </el-form-item>
+      </el-form>
+
+      <!-- 用户列表 -->
+      <el-table
+          @row-click="clickUserRow"
+          ref="userTableRef"
+          :data="hehuorenguserList"
+          @selection-change="handleUserSelectionChange"
+          height="300px"
+      >
+        <el-table-column type="selection" width="55"></el-table-column>
+        <el-table-column label="用户名称" prop="userName" :show-overflow-tooltip="true" />
+        <el-table-column label="用户昵称" prop="nickName" :show-overflow-tooltip="true" />
+        <el-table-column label="手机" prop="phonenumber" :show-overflow-tooltip="true" />
+        <el-table-column label="状态" align="center" prop="status">
+          <template #default="scope">
+            <dict-tag :options="sys_normal_disable" :value="scope.row.status" />
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <!-- 分页 -->
+      <pagination
+          v-show="hehuorenguserTotal > 0"
+          :total="hehuorenguserTotal"
+          v-model:page="userQueryParams.pageNum"
+          v-model:limit="userQueryParams.pageSize"
+          @pagination="getHehuorengUserList"
+      />
+
+      <!-- 弹窗按钮 -->
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button type="primary" @click="confirmSelectHehuorengUser">确 定</el-button>
+          <el-button @click="selectHehuorenUserVisible = false">取 消</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -234,8 +329,11 @@ const { sys_normal_disable } = proxy.useDict("sys_normal_disable");
 
 // 用户选择弹窗相关变量
 const selectUserVisible = ref(false); // 弹窗显示状态
+const selectHehuorenUserVisible = ref(false); // 弹窗显示状态
 const userList = ref([]); // 系统用户列表
+const hehuorenguserList = ref([]); // 合伙人系统用户列表
 const userTotal = ref(0); // 用户总数
+const hehuorenguserTotal = ref(0); // 用户总数
 const selectedUser = ref(null); // 选中的用户
 
 
@@ -282,6 +380,12 @@ function openSelectUserDialog() {
   getUserList(); // 加载用户列表
 }
 
+// 打开用户选择弹窗
+function openSelectHehuorengUserDialog() {
+  selectHehuorenUserVisible.value = true;
+  getHehuorengUserList(); // 加载用户列表
+}
+
 // 查询系统用户列表
 function getUserList() {
   listUser(userQueryParams).then(res => {
@@ -290,11 +394,26 @@ function getUserList() {
   });
 }
 
+// 查询合伙人系统用户列表
+function getHehuorengUserList() {
+  listUser(userQueryParams).then(res => {
+    hehuorenguserList.value = res.rows;
+    hehuorenguserTotal.value = res.total;
+  });
+}
+
 // 重置用户查询条件
 function resetUserQuery() {
   proxy.resetForm("userQueryRef");
   userQueryParams.pageNum = 1;
   getUserList();
+}
+
+// 重置合伙人用户查询条件
+function resetHehuoUserQuery(){
+  proxy.resetForm("hehuorenuserQueryRef");
+  userQueryParams.pageNum = 1;
+  getHehuorengUserList();
 }
 
 // 选中用户行
@@ -321,6 +440,18 @@ function confirmSelectUser() {
   form.value.userId = selectedUser.value.userId;
   form.value.userName = selectedUser.value.userName;
   selectUserVisible.value = false;
+}
+
+// 确认选择合伙人用户
+function confirmSelectHehuorengUser() {
+  if (!selectedUser.value) {
+    proxy.$modal.msgError("请选择用户");
+    return;
+  }
+  // 赋值给表单
+  form.value.hehuouserId = selectedUser.value.userId;
+  form.value.hehuorenguserName = selectedUser.value.userName;
+  selectHehuorenUserVisible.value = false;
 }
 
 // 在表单验证规则中添加（如果需要）
