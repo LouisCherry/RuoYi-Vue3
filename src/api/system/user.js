@@ -90,13 +90,14 @@ export function updateUserProfile(data) {
 // 用户密码重置
 export function updateUserPwd(oldPassword, newPassword) {
   const data = {
-    oldPassword,
-    newPassword
+    oldPassword: oldPassword, // 对应后端params.get("oldPassword")
+    newPassword: newPassword
   }
   return request({
     url: '/system/user/profile/updatePwd',
     method: 'put',
-    params: data
+    headers: { 'Content-Type': 'application/json' },
+    data: data
   })
 }
 
